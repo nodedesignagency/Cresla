@@ -1,16 +1,15 @@
 import type { ReactNode } from 'react'
 
-// Registering the angle as a typed property lets the browser interpolate it smoothly
-// (Safari 16.4+). Where that isn't supported the gold simply stays still.
-if (typeof CSS !== 'undefined' && 'registerProperty' in CSS) {
-  try {
-    CSS.registerProperty({ name: '--gold-angle', syntax: '<angle>', inherits: false, initialValue: '100deg' })
-  } catch {
-    // Already registered (e.g. after a hot reload).
-  }
-}
-
-/** Text filled with a gold-foil gradient whose light slowly rotates around the letters. */
+/**
+ * Text filled with a flowing gold "mesh" gradient: soft blobs of light and deep gold that
+ * drift slowly inside the letters.
+ */
 export function GoldText({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <span className={`animate-gold-spin bg-gold bg-clip-text text-transparent ${className}`}>{children}</span>
+  return (
+    <span
+      className={`animate-gold-mesh bg-gold-mesh bg-[length:38%_320%,44%_320%,34%_320%,50%_320%,100%_100%] bg-[position:5%_50%,85%_40%,45%_60%,100%_50%,0_0] bg-no-repeat bg-clip-text text-transparent ${className}`}
+    >
+      {children}
+    </span>
+  )
 }

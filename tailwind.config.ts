@@ -109,8 +109,15 @@ export default {
         'rule-fade': 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
         // CTA highlight sweep
         shine: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%)',
-        // Gold foil for the trial heading; --gold-angle is animated by `animate-gold-spin`.
-        gold: 'linear-gradient(var(--gold-angle, 100deg), #7a5a10 0%, #c09a32 18%, #f1dc8a 32%, #a27c20 48%, #e2c766 64%, #8c6a16 80%, #d6b855 100%)',
+        // Gold "mesh" for the trial heading: soft blobs of light and deep gold over a gold base.
+        // `animate-gold-mesh` drifts the blobs around (one background-position per layer).
+        'gold-mesh': [
+          'radial-gradient(closest-side, #fbeeb4 0%, rgba(251,238,180,0) 100%)',
+          'radial-gradient(closest-side, #6f500c 0%, rgba(111,80,12,0) 100%)',
+          'radial-gradient(closest-side, #f0d06a 0%, rgba(240,208,106,0) 100%)',
+          'radial-gradient(closest-side, #8a6614 0%, rgba(138,102,20,0) 100%)',
+          'linear-gradient(90deg, #a07a1c 0%, #c9a43d 50%, #a07a1c 100%)',
+        ].join(', '),
         // Light streaming down the ray, and the glow it leaves around the mascot.
         stream: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0) 100%)',
         halo: 'radial-gradient(closest-side, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0) 100%)',
@@ -141,7 +148,12 @@ export default {
           from: { transform: 'scale(0.92)', opacity: '0.55' },
           to: { transform: 'scale(1.06)', opacity: '1' },
         },
-        'gold-spin': { from: { '--gold-angle': '100deg' }, to: { '--gold-angle': '460deg' } },
+        'gold-mesh': {
+          '0%': { backgroundPosition: '5% 50%, 85% 40%, 45% 60%, 100% 50%, 0 0' },
+          '33%': { backgroundPosition: '55% 30%, 20% 65%, 95% 45%, 35% 55%, 0 0' },
+          '66%': { backgroundPosition: '95% 60%, 55% 40%, 10% 55%, 75% 40%, 0 0' },
+          '100%': { backgroundPosition: '30% 45%, 100% 55%, 65% 40%, 0% 60%, 0 0' },
+        },
         'text-glint': {
           from: { backgroundPosition: '160% 0, 0 0' },
           to: { backgroundPosition: '-60% 0, 0 0' },
@@ -157,8 +169,17 @@ export default {
         },
         // Timeline: the lit capsule slides down while its contents counter-slide, so the
         // white icons stay put and are uncovered exactly as the leading edge reaches them.
-        'rail-fill': { from: { transform: 'translateY(-117px)' }, to: { transform: 'translateY(0)' } },
-        'rail-counter': { from: { transform: 'translateY(117px)' }, to: { transform: 'translateY(0)' } },
+        // It rests on Today, glides to Day 2, rests, then glides to Day 3 (1s rests, 1.2s glides).
+        'rail-fill': {
+          '0%, 22.73%': { transform: 'translateY(-117px)' },
+          '50%, 72.73%': { transform: 'translateY(-58px)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+        'rail-counter': {
+          '0%, 22.73%': { transform: 'translateY(117px)' },
+          '50%, 72.73%': { transform: 'translateY(58px)' },
+          '100%': { transform: 'translateY(0)' },
+        },
         'rail-glint': { from: { transform: 'translateY(-60px)' }, to: { transform: 'translateY(180px)' } },
         'icon-pop': {
           '0%': { transform: 'scale(0.4)' },
@@ -180,12 +201,12 @@ export default {
         'ray-stream': 'ray-stream 3.4s cubic-bezier(0.4, 0, 0.7, 1) infinite',
         'mote-fall': 'mote-fall 4.2s linear infinite',
         'halo-pulse': 'halo-pulse 3.4s ease-in-out infinite alternate',
-        'gold-spin': 'gold-spin 5s linear infinite',
+        'gold-mesh': 'gold-mesh 9s ease-in-out infinite alternate',
         'text-glint': 'text-glint 1.5s cubic-bezier(0.45, 0, 0.25, 1) both',
         'shine-sweep': 'shine-sweep 4.8s cubic-bezier(0.45, 0, 0.25, 1) infinite',
         twinkle: 'twinkle 4s ease-out infinite',
-        'rail-fill': 'rail-fill 1.9s cubic-bezier(0.5, 0, 0.2, 1) both',
-        'rail-counter': 'rail-counter 1.9s cubic-bezier(0.5, 0, 0.2, 1) both',
+        'rail-fill': 'rail-fill 4.4s cubic-bezier(0.65, 0, 0.35, 1) both',
+        'rail-counter': 'rail-counter 4.4s cubic-bezier(0.65, 0, 0.35, 1) both',
         'rail-glint': 'rail-glint 1.1s cubic-bezier(0.45, 0, 0.3, 1) both',
         'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
         'row-lit': 'row-lit 0.5s ease-out both',

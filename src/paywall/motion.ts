@@ -166,8 +166,5 @@ export const fadeIn: Variants = {
 /** Plan selection ring and radio. */
 export const selectSpring: Transition = { type: 'spring', bounce: 0.2, duration: 0.5 }
 
-/** Press feedback, as a whole transform so it runs on the compositor. */
-export const pressSpring: Transition = { type: 'spring', bounce: 0.3, duration: 0.35 }
-
 /** Inline style for a CSS animation that should start `seconds` after it is applied. */
 export const delay = (seconds: number) => ({ animationDelay: `${seconds}s` })

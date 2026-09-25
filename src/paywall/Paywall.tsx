@@ -78,6 +78,8 @@ export function Paywall({
         initial={reduceMotion ? false : 'hidden'}
         animate={introStarted || reduceMotion ? 'show' : 'hidden'}
         className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none motion-reduce:**:animate-none!"
+        // iOS only applies :active (the press feedback) when a touch listener is present.
+        onTouchStart={() => {}}
       >
         <SkyBackground playing={introStarted} />
         <LightRays />

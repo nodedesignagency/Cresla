@@ -129,8 +129,8 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 | `icon-bureaus.svg`, `icon-letters.svg`, `icon-support.svg` | Perk icons | From Figma, 16×16 | |
 
 Drawn in code, not files: the sparkle stars on the Annual card (the 4-point star from the Figma
-"spark" component, `components/Sparkles.tsx`) and the rotating gold of the "HOW YOUR FREE TRIAL
-WORKS" heading (the `gold` gradient in `tailwind.config.ts`).
+"spark" component, `components/Sparkles.tsx`) and the flowing gold of the "HOW YOUR FREE TRIAL
+WORKS" heading (the `gold-mesh` gradient in `tailwind.config.ts`).
 
 ## Motion
 

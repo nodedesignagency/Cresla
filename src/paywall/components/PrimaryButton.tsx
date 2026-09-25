@@ -1,6 +1,4 @@
-import { motion } from 'framer-motion'
 import { Fragment } from 'react'
-import { pressSpring } from '../motion'
 import { focusRing } from '../ui'
 
 interface PrimaryButtonProps {
@@ -14,12 +12,11 @@ interface PrimaryButtonProps {
 
 export function PrimaryButton({ title, details = [], onClick, shine = false }: PrimaryButtonProps) {
   return (
-    <motion.button
+    // Press feedback is plain CSS (the `scale` property), composited and never left half-way.
+    <button
       type="button"
       onClick={onClick}
-      whileTap={{ transform: 'scale(0.97)', opacity: 0.92 }}
-      transition={pressSpring}
-      className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta ${focusRing}`}
+      className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta transition-[scale,opacity] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.97] active:opacity-90 ${focusRing}`}
     >
       {shine && (
         <span
@@ -44,6 +41,6 @@ export function PrimaryButton({ title, details = [], onClick, shine = false }: P
           ))}
         </span>
       )}
-    </motion.button>
+    </button>
   )
 }
