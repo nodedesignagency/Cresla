@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { focusRing } from '../ui'
 
 interface PrimaryButtonProps {
   title: string
@@ -12,7 +13,7 @@ export function PrimaryButton({ title, details = [], onClick }: PrimaryButtonPro
     <button
       type="button"
       onClick={onClick}
-      className="relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta"
+      className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta ${focusRing}`}
     >
       <span className="text-cta font-medium whitespace-nowrap [font-feature-settings:'calt'_0,'liga'_0]">{title}</span>
       {details.length > 0 && (

@@ -14,7 +14,14 @@ const previewInsets = Capacitor.isNativePlatform()
 export default function App() {
   return (
     <div style={previewInsets}>
-      <Paywall />
+      <Paywall
+        // No real payments yet: log what would be purchased.
+        onSubscribe={(plan) => console.log('[Paywall] onSubscribe', plan.id, plan)}
+        onSignIn={() => console.log('[Paywall] onSignIn')}
+        onRestore={() => console.log('[Paywall] onRestore')}
+        onOpenTerms={() => console.log('[Paywall] onOpenTerms')}
+        onOpenPrivacy={() => console.log('[Paywall] onOpenPrivacy')}
+      />
     </div>
   )
 }

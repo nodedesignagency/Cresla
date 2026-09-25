@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import goldFoil from '../assets/gold-foil.jpg'
 import bureausIcon from '../assets/icon-bureaus.svg'
 import lettersIcon from '../assets/icon-letters.svg'
@@ -11,7 +11,8 @@ import { PlanCard } from './components/PlanCard'
 import { PrimaryButton } from './components/PrimaryButton'
 import { SkyBackground } from './components/SkyBackground'
 import { TrialTimeline, type TimelineStep } from './components/TrialTimeline'
-import { PLAN_ORDER, PLANS, type PlanId } from './plans'
+import { PLAN_ORDER, PLANS, type Plan, type PlanId } from './plans'
+import { focusRing, hitArea } from './ui'
 
 const TIMELINE: TimelineStep[] = [
   {
@@ -36,8 +37,26 @@ const goldFoilText: CSSProperties = {
   backgroundRepeat: 'repeat, no-repeat',
 }
 
-export function Paywall() {
-  const selectedPlan: PlanId = 'annual'
+export interface PaywallProps {
+  /** Called when the CTA is tapped with the currently selected plan. */
+  onSubscribe: (plan: Plan) => void
+  onSignIn?: () => void
+  onRestore?: () => void
+  onOpenTerms?: () => void
+  onOpenPrivacy?: () => void
+  /** Plan selected when the paywall opens. */
+  defaultPlan?: PlanId
+}
+
+export function Paywall({
+  onSubscribe,
+  onSignIn,
+  onRestore,
+  onOpenTerms,
+  onOpenPrivacy,
+  defaultPlan = 'annual',
+}: PaywallProps) {
+  const [selectedPlan, setSelectedPlan] = useState<PlanId>(defaultPlan)
   const plan = PLANS[selectedPlan]
 
   return (
@@ -49,12 +68,15 @@ export function Paywall() {
       <LightRays />
 
       <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)] pb-[max(calc(var(--safe-bottom)-20px),14px)]">
-        <button
-          type="button"
-          className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20 rounded-full bg-white/70 px-2.5 py-1.5 text-button font-medium"
-        >
-          Sign In
-        </button>
+        <div className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20">
+          <button
+            type="button"
+            onClick={onSignIn}
+            className={`${hitArea} ${focusRing} cursor-pointer rounded-full bg-white/70 px-2.5 py-1.5 text-button font-medium transition-opacity active:opacity-60`}
+          >
+            Sign In
+          </button>
+        </div>
 
         <header className="flex flex-col items-center gap-0.5">
           <OwlMascot />
@@ -92,13 +114,31 @@ export function Paywall() {
         <div className="min-h-[17px] flex-1" />
 
         <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
-          {PLAN_ORDER.map((id) => (
-            <PlanCard key={id} {...PLANS[id]} selected={id === selectedPlan} />
-          ))}
+          {PLAN_ORDER.map((id) => {
+            const option = PLANS[id]
+            return (
+              <PlanCard
+                key={id}
+                name="paywall-plan"
+                value={id}
+                label={option.label}
+                trial={option.trial}
+                price={option.price}
+                priceNote={option.priceNote}
+                badge={option.badge}
+                selected={id === selectedPlan}
+                onSelect={() => setSelectedPlan(id)}
+              />
+            )
+          })}
         </div>
 
         <div className="mt-2">
-          <PrimaryButton title="Start My FREE 3-Day Trial" details={['No charge today', plan.ctaPrice]} />
+          <PrimaryButton
+            title="Start My FREE 3-Day Trial"
+            details={['No charge today', plan.ctaPrice]}
+            onClick={() => onSubscribe(plan)}
+          />
         </div>
 
         <footer className="mt-3 flex flex-col items-center gap-3 text-caption text-muted">
@@ -108,11 +148,11 @@ export function Paywall() {
             <span>Auto-renews until canceled</span>
           </p>
           <nav className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
-            <FooterLink>Terms of use</FooterLink>
+            <FooterLink onClick={onOpenTerms}>Terms of use</FooterLink>
             <FooterDot />
-            <FooterLink>Privacy Policy</FooterLink>
+            <FooterLink onClick={onOpenPrivacy}>Privacy Policy</FooterLink>
             <FooterDot />
-            <FooterLink>Restore</FooterLink>
+            <FooterLink onClick={onRestore}>Restore</FooterLink>
           </nav>
         </footer>
       </div>
@@ -124,9 +164,14 @@ function FooterDot() {
   return <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-muted" />
 }
 
-function FooterLink({ children }: { children: string }) {
+// Links sit 18px apart, so each tap area is 44pt tall and reaches halfway into the gaps.
+function FooterLink({ children, onClick }: { children: string; onClick?: () => void }) {
   return (
-    <button type="button" className="underline decoration-from-font [text-underline-position:from-font]">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative cursor-pointer underline decoration-from-font transition-opacity [text-underline-position:from-font] after:absolute after:top-1/2 after:left-1/2 after:h-11 after:w-[max(calc(100%+16px),44px)] after:-translate-x-1/2 after:-translate-y-1/2 active:opacity-60 ${focusRing}`}
+    >
       {children}
     </button>
   )
