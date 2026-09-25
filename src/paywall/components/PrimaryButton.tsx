@@ -1,6 +1,6 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Fragment } from 'react'
-import { easeInOut } from '../motion'
+import { pressSpring } from '../motion'
 import { focusRing } from '../ui'
 
 interface PrimaryButtonProps {
@@ -13,24 +13,18 @@ interface PrimaryButtonProps {
 }
 
 export function PrimaryButton({ title, details = [], onClick, shine = false }: PrimaryButtonProps) {
-  const reduceMotion = useReducedMotion()
-
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      whileTap={{ scale: 0.97, opacity: 0.92 }}
-      transition={{ type: 'spring', bounce: 0.3, duration: 0.35 }}
+      whileTap={{ transform: 'scale(0.97)', opacity: 0.92 }}
+      transition={pressSpring}
       className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta ${focusRing}`}
     >
-      {shine && !reduceMotion && (
-        <motion.span
+      {shine && (
+        <span
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-shine"
-          style={{ skewX: -20 }}
-          initial={{ x: '-130%' }}
-          animate={{ x: '400%' }}
-          transition={{ duration: 1.2, ease: easeInOut, delay: 0.4, repeat: Infinity, repeatDelay: 3.6 }}
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shine-sweep bg-shine [animation-delay:0.2s] [transform:translateX(-130%)_skewX(-20deg)]"
         />
       )}
       <span className="relative text-cta font-medium whitespace-nowrap [font-feature-settings:'calt'_0,'liga'_0]">

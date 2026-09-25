@@ -1,10 +1,10 @@
-import { LayoutGroup, motion, MotionConfig } from 'framer-motion'
+import { LayoutGroup, motion, MotionConfig, useReducedMotion } from 'framer-motion'
 import { useEffect, useId, useState, type CSSProperties } from 'react'
-import goldFoil from '../assets/gold-foil.jpg'
 import bureausIcon from '../assets/icon-bureaus.svg'
 import lettersIcon from '../assets/icon-letters.svg'
 import supportIcon from '../assets/icon-support.svg'
 import { GlossBadge } from './components/GlossBadge'
+import { GoldText } from './components/GoldText'
 import { LightRays } from './components/LightRays'
 import { OwlMascot } from './components/OwlMascot'
 import { PerkDivider, PerkItem } from './components/PerkItem'
@@ -12,7 +12,7 @@ import { PlanCard } from './components/PlanCard'
 import { PrimaryButton } from './components/PrimaryButton'
 import { SkyBackground } from './components/SkyBackground'
 import { TrialTimeline, type TimelineStep } from './components/TrialTimeline'
-import { fadeIn, fadeUp, INTRO } from './motion'
+import { cardIn, delay, fadeIn, focusIn, itemIn, popIn, STORY } from './motion'
 import { PLAN_ORDER, PLANS, type Plan, type PlanId } from './plans'
 import { focusRing, hitArea } from './ui'
 
@@ -31,13 +31,6 @@ const rootStyle = {
   '--safe-top': 'var(--paywall-safe-top, env(safe-area-inset-top, 0px))',
   '--safe-bottom': 'var(--paywall-safe-bottom, env(safe-area-inset-bottom, 0px))',
 } as CSSProperties
-
-const goldFoilText: CSSProperties = {
-  backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url(${goldFoil})`,
-  backgroundSize: 'auto, cover',
-  backgroundPosition: 'left top, center',
-  backgroundRepeat: 'repeat, no-repeat',
-}
 
 export interface PaywallProps {
   /** Called when the CTA is tapped with the currently selected plan. */
@@ -61,9 +54,10 @@ export function Paywall({
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(defaultPlan)
   const plan = PLANS[selectedPlan]
   const planGroupId = useId()
+  const reduceMotion = useReducedMotion()
 
-  // The intro starts once the mascot image is ready (so it never pops in mid-drop),
-  // or after 1.2s regardless. Ambient details wait until everything has landed.
+  // The intro starts once the mascot image is ready (so it never pops in mid-drop), or
+  // after 1.2s regardless. Ambient details wait until everything has landed.
   const [introStarted, setIntroStarted] = useState(false)
   const [introSettled, setIntroSettled] = useState(false)
   useEffect(() => {
@@ -72,7 +66,7 @@ export function Paywall({
   }, [])
   useEffect(() => {
     if (!introStarted) return
-    const timer = setTimeout(() => setIntroSettled(true), INTRO.settled * 1000)
+    const timer = setTimeout(() => setIntroSettled(true), STORY.settled * 1000)
     return () => clearTimeout(timer)
   }, [introStarted])
 
@@ -80,15 +74,20 @@ export function Paywall({
     <MotionConfig reducedMotion="user">
       <motion.div
         style={rootStyle}
-        initial="hidden"
-        animate={introStarted ? 'show' : 'hidden'}
-        className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none"
+        // With Reduce Motion on, everything simply appears in place and no loops run.
+        initial={reduceMotion ? false : 'hidden'}
+        animate={introStarted || reduceMotion ? 'show' : 'hidden'}
+        className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none motion-reduce:**:animate-none!"
       >
-        <SkyBackground />
+        <SkyBackground playing={introStarted} />
         <LightRays />
 
         <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)] pb-[max(calc(var(--safe-bottom)-20px),14px)]">
-          <motion.div variants={fadeIn} className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20">
+          <motion.div
+            variants={fadeIn}
+            custom={STORY.subline}
+            className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20"
+          >
             <button
               type="button"
               onClick={onSignIn}
@@ -99,61 +98,71 @@ export function Paywall({
           </motion.div>
 
           <header className="flex flex-col items-center gap-0.5">
-            <OwlMascot onReady={() => setIntroStarted(true)} />
+            <OwlMascot onReady={() => setIntroStarted(true)} playing={introStarted} />
             <div className="flex w-full flex-col items-center gap-[18px]">
-              <motion.h1
-                variants={fadeUp}
-                custom={0}
-                className="-my-trim-display flex flex-col items-center text-center text-display font-medium"
-              >
-                <span className="whitespace-nowrap">Dispute letters that</span>
-                <span className="whitespace-nowrap">
-                  get results. <span className="bg-headline bg-clip-text text-transparent">Free for 3 days.</span>
-                </span>
-              </motion.h1>
-              <motion.div variants={fadeUp} custom={1} className="flex items-center justify-center gap-1">
-                <p className="-my-trim-label text-label whitespace-nowrap">Everything unlocked.</p>
-                <GlossBadge tone="success">No Charge Today</GlossBadge>
-              </motion.div>
+              <h1 className="-my-trim-display flex flex-col items-center text-center text-display font-medium">
+                <motion.span variants={focusIn} custom={STORY.headline} className="whitespace-nowrap">
+                  Dispute letters that
+                </motion.span>
+                <motion.span variants={focusIn} custom={STORY.headline + 0.1} className="whitespace-nowrap">
+                  get results.{' '}
+                  <span
+                    className={`bg-headline-glint bg-[length:250%_100%,100%_100%] bg-[position:160%_0,0_0] bg-no-repeat bg-clip-text text-transparent ${introStarted ? 'animate-text-glint' : ''}`}
+                    style={delay(STORY.settled - 0.2)}
+                  >
+                    Free for 3 days.
+                  </span>
+                </motion.span>
+              </h1>
+              <div className="flex items-center justify-center gap-1">
+                <motion.p
+                  variants={focusIn}
+                  custom={STORY.subline}
+                  className="-my-trim-label text-label whitespace-nowrap"
+                >
+                  Everything unlocked.
+                </motion.p>
+                <motion.span variants={popIn} custom={STORY.subline + 0.15}>
+                  <GlossBadge tone="success">No Charge Today</GlossBadge>
+                </motion.span>
+              </div>
             </div>
           </header>
 
           <motion.section
-            variants={fadeUp}
-            custom={2}
+            variants={cardIn}
+            custom={STORY.trial}
             aria-labelledby="trial-heading"
             className="mt-2.5 flex flex-col gap-1 rounded-card bg-white p-1 shadow-card"
           >
-            <h2 id="trial-heading" className="flex justify-center py-2">
-              <span
-                className="-my-trim-label bg-clip-text text-label font-medium text-transparent"
-                style={goldFoilText}
-              >
-                HOW YOUR FREE TRIAL WORKS
-              </span>
-            </h2>
-            <TrialTimeline steps={TIMELINE} play={introStarted} />
-            <ul className="flex items-center justify-between">
+            <motion.h2
+              variants={itemIn}
+              custom={STORY.trialItems - STORY.step}
+              id="trial-heading"
+              className="flex justify-center py-2"
+            >
+              <GoldText className="-my-trim-label text-label font-medium">HOW YOUR FREE TRIAL WORKS</GoldText>
+            </motion.h2>
+            <TrialTimeline steps={TIMELINE} playing={introStarted} />
+            <motion.ul
+              variants={itemIn}
+              custom={STORY.trialItems + 3 * STORY.step}
+              className="flex items-center justify-between"
+            >
               <PerkItem icon={bureausIcon} label="All 3 Bureaus" />
               <PerkDivider />
               <PerkItem icon={lettersIcon} label="Unlimited letters" />
               <PerkDivider />
               <PerkItem icon={supportIcon} label="Priority Support" />
-            </ul>
+            </motion.ul>
           </motion.section>
 
           {/* Absorbs extra height so the purchase block stays anchored to the bottom. */}
           <div className="min-h-[17px] flex-1" />
 
           <LayoutGroup id={planGroupId}>
-            <motion.div
-              variants={fadeUp}
-              custom={3}
-              role="radiogroup"
-              aria-label="Choose a plan"
-              className="flex gap-2"
-            >
-              {PLAN_ORDER.map((id) => {
+            <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
+              {PLAN_ORDER.map((id, index) => {
                 const option = PLANS[id]
                 return (
                   <PlanCard
@@ -168,13 +177,15 @@ export function Paywall({
                     selected={id === selectedPlan}
                     onSelect={() => setSelectedPlan(id)}
                     sparkle={id === 'annual' && introSettled}
+                    enterAt={STORY.plans + index * STORY.step}
+                    badgeAt={STORY.saveBadge}
                   />
                 )
               })}
-            </motion.div>
+            </div>
           </LayoutGroup>
 
-          <motion.div variants={fadeUp} custom={4} className="mt-2">
+          <motion.div variants={cardIn} custom={STORY.cta} className="mt-2">
             <PrimaryButton
               title="Start My FREE 3-Day Trial"
               details={['No charge today', plan.ctaPrice]}
@@ -184,8 +195,8 @@ export function Paywall({
           </motion.div>
 
           <motion.footer
-            variants={fadeUp}
-            custom={5}
+            variants={fadeIn}
+            custom={STORY.footer}
             className="mt-3 flex flex-col items-center gap-3 text-caption text-muted"
           >
             <p className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">

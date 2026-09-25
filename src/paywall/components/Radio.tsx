@@ -11,14 +11,17 @@ export function Radio({ checked }: { checked: boolean }) {
       <motion.span
         className="absolute inset-[10%] rounded-full border-t border-brand-deep bg-brand shadow-radio-active"
         initial={false}
-        animate={{ opacity: checked ? 1 : 0, scale: checked ? 1 : 0.5 }}
-        transition={{ ...pop, bounce: 0.25, opacity: { duration: 0.18 } }}
+        animate={{ opacity: checked ? 1 : 0, transform: checked ? 'scale(1)' : 'scale(0.5)' }}
+        transition={{ transform: { ...pop, bounce: 0.25 }, opacity: { duration: 0.18 } }}
       />
       <motion.span
         className="absolute inset-[30%] rounded-full border border-white bg-white shadow-radio-dot"
         initial={false}
-        animate={{ opacity: checked ? 1 : 0, scale: checked ? 1 : 0 }}
-        transition={{ ...pop, delay: checked ? 0.06 : 0, opacity: { duration: 0.15 } }}
+        animate={{ opacity: checked ? 1 : 0, transform: checked ? 'scale(1)' : 'scale(0)' }}
+        transition={{
+          transform: { ...pop, delay: checked ? 0.06 : 0 },
+          opacity: { duration: 0.15, delay: checked ? 0.06 : 0 },
+        }}
       />
     </span>
   )

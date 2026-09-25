@@ -109,6 +109,86 @@ export default {
         'rule-fade': 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
         // CTA highlight sweep
         shine: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%)',
+        // Gold foil for the trial heading; --gold-angle is animated by `animate-gold-spin`.
+        gold: 'linear-gradient(var(--gold-angle, 100deg), #7a5a10 0%, #c09a32 18%, #f1dc8a 32%, #a27c20 48%, #e2c766 64%, #8c6a16 80%, #d6b855 100%)',
+        // Light streaming down the ray, and the glow it leaves around the mascot.
+        stream: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0) 100%)',
+        halo: 'radial-gradient(closest-side, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0) 100%)',
+        // "Free for 3 days." gradient with a glint layer on top that passes over it once.
+        'headline-glint':
+          'linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, #287cf9 0%, #0f39b3 100%)',
+      },
+
+      // Ambient loops run as CSS animations so iOS composites them off the main thread;
+      // they stay smooth even while JavaScript is busy. Delays are set inline per element.
+      keyframes: {
+        'cloud-drift-far': { from: { transform: 'translateX(-56px)' }, to: { transform: 'translateX(56px)' } },
+        'cloud-drift-back': { from: { transform: 'translateX(-38px)' }, to: { transform: 'translateX(38px)' } },
+        'cloud-drift-front': { from: { transform: 'translateX(-66px)' }, to: { transform: 'translateX(66px)' } },
+        'cloud-bob': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-5px)' } },
+        'cloud-bump': { '0%, 100%': { transform: 'translateY(0)' }, '30%': { transform: 'translateY(7px)' } },
+        'owl-float': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-7px)' } },
+        'ray-sway': { from: { transform: 'rotate(-1.6deg)' }, to: { transform: 'rotate(1.6deg)' } },
+        'ray-pulse': { from: { opacity: '0.5' }, to: { opacity: '0.32' } },
+        'ray-stream': { from: { transform: 'translateY(-100%)' }, to: { transform: 'translateY(220%)' } },
+        'mote-fall': {
+          '0%': { transform: 'translateY(0) scale(0.5)', opacity: '0' },
+          '20%': { opacity: '1' },
+          '75%': { opacity: '0.8' },
+          '100%': { transform: 'translateY(150px) scale(1)', opacity: '0' },
+        },
+        'halo-pulse': {
+          from: { transform: 'scale(0.92)', opacity: '0.55' },
+          to: { transform: 'scale(1.06)', opacity: '1' },
+        },
+        'gold-spin': { from: { '--gold-angle': '100deg' }, to: { '--gold-angle': '460deg' } },
+        'text-glint': {
+          from: { backgroundPosition: '160% 0, 0 0' },
+          to: { backgroundPosition: '-60% 0, 0 0' },
+        },
+        'shine-sweep': {
+          '0%': { transform: 'translateX(-130%) skewX(-20deg)' },
+          '26%, 100%': { transform: 'translateX(430%) skewX(-20deg)' },
+        },
+        twinkle: {
+          '0%': { transform: 'scale(0) rotate(0deg)', opacity: '0' },
+          '12%': { transform: 'scale(1) rotate(45deg)', opacity: '1' },
+          '28%, 100%': { transform: 'scale(0) rotate(90deg)', opacity: '0' },
+        },
+        // Timeline: the lit capsule slides down while its contents counter-slide, so the
+        // white icons stay put and are uncovered exactly as the leading edge reaches them.
+        'rail-fill': { from: { transform: 'translateY(-117px)' }, to: { transform: 'translateY(0)' } },
+        'rail-counter': { from: { transform: 'translateY(117px)' }, to: { transform: 'translateY(0)' } },
+        'rail-glint': { from: { transform: 'translateY(-60px)' }, to: { transform: 'translateY(180px)' } },
+        'icon-pop': {
+          '0%': { transform: 'scale(0.4)' },
+          '55%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'row-lit': { from: { opacity: '0.4' }, to: { opacity: '1' } },
+      },
+
+      animation: {
+        'cloud-drift-far': 'cloud-drift-far 21s ease-in-out infinite alternate',
+        'cloud-drift-back': 'cloud-drift-back 13s ease-in-out infinite alternate',
+        'cloud-drift-front': 'cloud-drift-front 9s ease-in-out infinite alternate',
+        'cloud-bob': 'cloud-bob 5.5s ease-in-out infinite alternate',
+        'cloud-bump': 'cloud-bump 1s cubic-bezier(0.3, 0, 0.2, 1) both',
+        'owl-float': 'owl-float 2.8s ease-in-out infinite alternate',
+        'ray-sway': 'ray-sway 7s ease-in-out infinite alternate',
+        'ray-pulse': 'ray-pulse 3.6s ease-in-out infinite alternate',
+        'ray-stream': 'ray-stream 3.4s cubic-bezier(0.4, 0, 0.7, 1) infinite',
+        'mote-fall': 'mote-fall 4.2s linear infinite',
+        'halo-pulse': 'halo-pulse 3.4s ease-in-out infinite alternate',
+        'gold-spin': 'gold-spin 5s linear infinite',
+        'text-glint': 'text-glint 1.5s cubic-bezier(0.45, 0, 0.25, 1) both',
+        'shine-sweep': 'shine-sweep 4.8s cubic-bezier(0.45, 0, 0.25, 1) infinite',
+        twinkle: 'twinkle 4s ease-out infinite',
+        'rail-fill': 'rail-fill 1.9s cubic-bezier(0.5, 0, 0.2, 1) both',
+        'rail-counter': 'rail-counter 1.9s cubic-bezier(0.5, 0, 0.2, 1) both',
+        'rail-glint': 'rail-glint 1.1s cubic-bezier(0.45, 0, 0.3, 1) both',
+        'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
+        'row-lit': 'row-lit 0.5s ease-out both',
       },
     },
   },

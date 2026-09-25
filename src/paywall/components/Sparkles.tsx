@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { useReducedMotion } from 'framer-motion'
 
 // Four-point star from the Figma "spark" component.
 const STAR =
@@ -14,28 +14,19 @@ const STARS = [
 /** A few tiny stars that twinkle around the badge every few seconds while `active`. */
 export function Sparkles({ active }: { active: boolean }) {
   const reduceMotion = useReducedMotion()
+  if (!active || reduceMotion) return null
 
-  return (
-    <AnimatePresence>
-      {active &&
-        !reduceMotion &&
-        STARS.map(({ top, right, size, delay }) => (
-          <motion.svg
-            key={`${top}:${right}`}
-            aria-hidden
-            viewBox="0 0 19.5 19.5"
-            width={size}
-            height={size}
-            className="pointer-events-none absolute text-brand"
-            style={{ top, right }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: [0, 1, 0], scale: [0, 1, 0], rotate: [0, 90] }}
-            exit={{ opacity: 0, scale: 0, transition: { duration: 0.15 } }}
-            transition={{ duration: 1, ease: 'easeInOut', delay: 0.2 + delay, repeat: Infinity, repeatDelay: 3 }}
-          >
-            <path d={STAR} fill="currentColor" />
-          </motion.svg>
-        ))}
-    </AnimatePresence>
-  )
+  return STARS.map(({ top, right, size, delay }) => (
+    <svg
+      key={`${top}:${right}`}
+      aria-hidden
+      viewBox="0 0 19.5 19.5"
+      width={size}
+      height={size}
+      className="pointer-events-none absolute animate-twinkle text-brand"
+      style={{ top, right, animationDelay: `${delay}s` }}
+    >
+      <path d={STAR} fill="currentColor" />
+    </svg>
+  ))
 }

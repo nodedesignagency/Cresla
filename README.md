@@ -122,16 +122,25 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 | `owl.png` | Mascot | Draft owl from Figma, 697×724 | **Swap for the final owl.** Transparent PNG at about a 154:160 aspect ratio; it's shown at 154×160pt. The drop-in and float animations are already applied. |
 | `cloud-1.png` | Back cloud layer | From Figma, 2048×1138 | Shown at 889×494pt |
 | `cloud-2.png` | Front cloud layer | From Figma (same image) | Shown at 889×494pt |
+| `cloud-3.png` | Far, faint cloud layer (adds depth) | Same image | Shown at 600×333pt, 45% opacity |
 | `light-ray-wide.svg`, `light-ray-core.svg`, `light-glow.svg` | Light beams | From Figma | |
-| `gold-foil.jpg` | Fill of the "HOW YOUR FREE TRIAL WORKS" heading | From Figma | |
 | `icon-lock.png` | Timeline, Today | From Figma | White icon on transparent |
 | `icon-bell.png`, `icon-hourglass.png` | Timeline, Day 2 and Day 3 | From Figma, 24×24 | Used as alpha masks, so only the shape matters; color comes from code |
 | `icon-bureaus.svg`, `icon-letters.svg`, `icon-support.svg` | Perk icons | From Figma, 16×16 | |
 
-The sparkle stars on the Annual card use the 4-point star from the Figma "spark" component
-and are drawn in code (`components/Sparkles.tsx`) so they take the brand color.
+Drawn in code, not files: the sparkle stars on the Annual card (the 4-point star from the Figma
+"spark" component, `components/Sparkles.tsx`) and the rotating gold of the "HOW YOUR FREE TRIAL
+WORKS" heading (the `gold` gradient in `tailwind.config.ts`).
 
 ## Motion
 
-All timings live in `src/paywall/motion.ts`. With the system's Reduce Motion setting on,
-entrances become plain fades, nothing loops, and the timeline shows its end state.
+Every animation runs on the GPU compositor, so it stays smooth on iOS even while JavaScript is busy:
+
+- **Intro** (Framer Motion): the storyboard and its timings are in `STORY` in `src/paywall/motion.ts`.
+  It only animates whole `transform`, `opacity` and `filter` values, which Framer hands to the browser.
+  Avoid `x`/`y`/`scale` shorthands, `height` and similar, because those run in JavaScript on every frame.
+- **Loops and one-offs** (clouds, rays, owl float, timeline fill, shine, sparkles, gold): CSS
+  animations defined under `keyframes` / `animation` in `tailwind.config.ts`.
+
+With the system's Reduce Motion setting on, everything appears in place, nothing loops, and the
+timeline shows its end state.
