@@ -107,6 +107,8 @@ export default {
         icon: 'linear-gradient(180deg, #2882fa 0%, #0c32ab 100%)',
         'rule-dashed': 'linear-gradient(90deg, rgba(10,13,32,0.1) 50%, transparent 50%)',
         'rule-fade': 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
+        // CTA highlight sweep
+        shine: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%)',
       },
     },
   },

@@ -1,5 +1,8 @@
+import { motion } from 'framer-motion'
+import { selectSpring } from '../motion'
 import { GlossBadge } from './GlossBadge'
 import { Radio } from './Radio'
+import { Sparkles } from './Sparkles'
 
 interface PlanCardProps {
   /** Radio group name shared by all plan cards. */
@@ -12,11 +15,28 @@ interface PlanCardProps {
   badge?: string
   selected: boolean
   onSelect: () => void
+  /** Twinkle a few stars around the badge while this card is selected. */
+  sparkle?: boolean
 }
 
-export function PlanCard({ name, value, label, trial, price, priceNote, badge, selected, onSelect }: PlanCardProps) {
+export function PlanCard({
+  name,
+  value,
+  label,
+  trial,
+  price,
+  priceNote,
+  badge,
+  selected,
+  onSelect,
+  sparkle = false,
+}: PlanCardProps) {
   return (
-    <label className="relative flex min-w-0 flex-1 cursor-pointer flex-col justify-center gap-2.5 rounded-card bg-white p-4 shadow-card outline-offset-2 outline-brand has-[:focus-visible]:outline-2">
+    <motion.label
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', bounce: 0.3, duration: 0.35 }}
+      className="relative flex min-w-0 flex-1 cursor-pointer flex-col justify-center gap-2.5 rounded-card bg-white p-4 shadow-card outline-offset-2 outline-brand has-[:focus-visible]:outline-2"
+    >
       <input type="radio" name={name} value={value} checked={selected} onChange={onSelect} className="sr-only" />
 
       <span className="flex items-center gap-1">
@@ -34,8 +54,15 @@ export function PlanCard({ name, value, label, trial, price, priceNote, badge, s
         </span>
       </span>
 
+      {/* Selection ring glides between cards (shared layoutId within the parent LayoutGroup). */}
       {selected && (
-        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-card border border-brand" />
+        <motion.span
+          layoutId="plan-ring"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 border border-brand"
+          style={{ borderRadius: 18 }}
+          transition={selectSpring}
+        />
       )}
 
       {badge && (
@@ -43,6 +70,8 @@ export function PlanCard({ name, value, label, trial, price, priceNote, badge, s
           {badge}
         </GlossBadge>
       )}
-    </label>
+
+      <Sparkles active={sparkle && selected} />
+    </motion.label>
   )
 }

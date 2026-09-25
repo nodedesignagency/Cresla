@@ -1,4 +1,6 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { Fragment } from 'react'
+import { easeInOut } from '../motion'
 import { focusRing } from '../ui'
 
 interface PrimaryButtonProps {
@@ -6,18 +8,36 @@ interface PrimaryButtonProps {
   /** Short facts shown under the title, separated by bullets. */
   details?: string[]
   onClick?: () => void
+  /** Sweep a soft highlight across the button every few seconds. */
+  shine?: boolean
 }
 
-export function PrimaryButton({ title, details = [], onClick }: PrimaryButtonProps) {
+export function PrimaryButton({ title, details = [], onClick, shine = false }: PrimaryButtonProps) {
+  const reduceMotion = useReducedMotion()
+
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
+      whileTap={{ scale: 0.97, opacity: 0.92 }}
+      transition={{ type: 'spring', bounce: 0.3, duration: 0.35 }}
       className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta ${focusRing}`}
     >
-      <span className="text-cta font-medium whitespace-nowrap [font-feature-settings:'calt'_0,'liga'_0]">{title}</span>
+      {shine && !reduceMotion && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-shine"
+          style={{ skewX: -20 }}
+          initial={{ x: '-130%' }}
+          animate={{ x: '400%' }}
+          transition={{ duration: 1.2, ease: easeInOut, delay: 0.4, repeat: Infinity, repeatDelay: 3.6 }}
+        />
+      )}
+      <span className="relative text-cta font-medium whitespace-nowrap [font-feature-settings:'calt'_0,'liga'_0]">
+        {title}
+      </span>
       {details.length > 0 && (
-        <span className="-my-trim-rounded flex items-center gap-1 font-rounded text-caption whitespace-nowrap">
+        <span className="relative -my-trim-rounded flex items-center gap-1 font-rounded text-caption whitespace-nowrap">
           {details.map((detail, i) => (
             <Fragment key={detail}>
               {i > 0 && (
@@ -30,6 +50,6 @@ export function PrimaryButton({ title, details = [], onClick }: PrimaryButtonPro
           ))}
         </span>
       )}
-    </button>
+    </motion.button>
   )
 }
