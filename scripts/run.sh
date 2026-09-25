@@ -57,5 +57,20 @@ udid=$(xcrun simctl list devices available --json | node -e '
   console.log(pick.udid)
 ' "${1:-}")
 
-step "Building and launching in the Simulator (the first build takes a few minutes)"
-npx cap run ios --no-sync --target "$udid"
+# Build, install and launch directly with Xcode's tools. (`cap run ios` looks for Simulator.app
+# at a fixed path inside Xcode, which newer Xcode versions no longer use.)
+step "Building the iOS app (the first build takes a few minutes)"
+derived="ios/DerivedData/$udid"
+xcrun xcodebuild -quiet \
+  -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+  -destination "id=$udid" -derivedDataPath "$derived"
+app="$derived/Build/Products/Debug-iphonesimulator/App.app"
+bundle_id=$(plutil -extract CFBundleIdentifier raw -o - "$app/Info.plist")
+
+step "Launching in the Simulator"
+open -a Simulator --args -CurrentDeviceUDID "$udid"
+xcrun simctl bootstatus "$udid" -b >/dev/null
+xcrun simctl install "$udid" "$app"
+xcrun simctl terminate "$udid" "$bundle_id" >/dev/null 2>&1 || true
+xcrun simctl launch "$udid" "$bundle_id" >/dev/null
+printf '\n\033[1;32m✓ Cresla is running in the Simulator\033[0m\n'
