@@ -10,6 +10,13 @@ const config: CapacitorConfig = {
     contentInset: 'never',
     backgroundColor: '#f2f4f8',
   },
+  plugins: {
+    StatusBar: {
+      // White status bar text over the blue sky, drawn on top of the web view.
+      style: 'DARK',
+      overlaysWebView: true,
+    },
+  },
 }
 
 export default config
