@@ -7,7 +7,26 @@ React 19 + TypeScript + Vite · Tailwind CSS v4 · Framer Motion · Capacitor 8 
 
 ## Run it
 
-Requires Node 22.12 or newer.
+Requires Node 22.12 or newer, and Xcode for the Simulator.
+
+### One command
+
+```bash
+./scripts/run.sh                 # install, build, sync, then build and launch in the iOS Simulator
+./scripts/run.sh "iPhone 16"     # same, on a specific simulator
+./scripts/run.sh web             # browser preview instead
+```
+
+Without a name it uses the simulator that's already open, or the newest iPhone Pro.
+The first Simulator build takes a few minutes; later runs are much faster.
+
+To pull the latest changes and run them:
+
+```bash
+cd ~/Cresla && git fetch origin && git checkout claude/charming-hawking-ilb5hy && git pull && ./scripts/run.sh
+```
+
+The sections below do the same steps by hand.
 
 ```bash
 npm install
