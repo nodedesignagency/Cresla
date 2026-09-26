@@ -17,10 +17,10 @@ interface TrialTimelineProps {
 }
 
 // Seconds after the fill starts at which its leading edge reaches each point. Derived from
-// the `rail-fill` keyframes (rest 1s on Today, glide 1.2s to Day 2, rest 1s, glide 1.2s to
-// Day 3, each glide cubic-bezier(0.65, 0, 0.35, 1)) and the rail geometry (edge from 37px
-// to 96px, then to 154px).
-const REACH = { row2: 1.61, bell: 1.69, row3: 3.77, hourglass: 3.89, end: 4.4 }
+// the `rail-fill` keyframes (rest 1.8s on Today, glide 1.6s to Day 2, rest 1.8s, glide 1.6s
+// to Day 3, each glide cubic-bezier(0.65, 0, 0.35, 1)) and the rail geometry (edge from
+// 37px to 96px, then to 154px).
+const REACH = { row2: 2.61, bell: 2.72, row3: 5.96, hourglass: 6.12, end: 6.8 }
 const ROW_REACH = [0, REACH.row2, REACH.row3]
 
 export function TrialTimeline({ steps, playing = true }: TrialTimelineProps) {

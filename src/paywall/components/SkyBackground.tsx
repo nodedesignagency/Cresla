@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import cloudBack from '../../assets/cloud-1.png'
 import cloudFront from '../../assets/cloud-2.png'
 import cloudFar from '../../assets/cloud-3.png'
@@ -7,52 +7,57 @@ import { cloudIn, delay, skyIn, STORY } from '../motion'
 // Figma frame is 393pt wide with a 59pt status bar. Clouds are positioned from the
 // horizontal center and follow the content when the device's top inset differs.
 //
-// Each cloud has four layers of motion: the intro glide (Framer, on the compositor),
-// a one-off dip when the owl lands, an endless sideways drift and a slow bob (CSS).
-// Nearer layers drift further and faster, which reads as parallax depth. Negative
-// delays start each drift mid-swing, at its design position and full speed.
+// Each cloud rises gently into place (Framer, on the compositor), then, once it has fully
+// settled, starts an endless sideways drift and a slow bob (CSS). The drift begins at rest
+// from the design position, so there is no change of speed or direction between the two.
+// Nearer layers drift further and faster, which reads as parallax depth.
 const CLOUDS = [
   {
     src: cloudFar,
     frame: 'top-[calc(var(--safe-top)-30px)] left-[calc(50%-300px)] h-[333px] w-[600px] opacity-45',
-    drift: 'animate-cloud-drift-far [animation-delay:-10.5s]',
-    bob: '[animation-delay:-2s]',
-    from: { x: 0, delay: STORY.clouds + 0.1 },
+    drift: 'animate-cloud-drift-far',
   },
   {
     src: cloudBack,
     frame: 'top-[calc(var(--safe-top)-51px)] left-[calc(50%-651.5px)] h-[494px] w-[889px]',
-    drift: 'animate-cloud-drift-back [animation-delay:-6.5s]',
-    bob: '[animation-delay:-4s]',
-    from: { x: -120, delay: STORY.clouds },
+    drift: 'animate-cloud-drift-back',
   },
   {
     src: cloudFront,
     frame: 'top-[calc(var(--safe-top)-47px)] left-[calc(50%-225.5px)] h-[494px] w-[889px]',
-    drift: 'animate-cloud-drift-front [animation-delay:-4.5s]',
-    bob: '',
-    from: { x: 140, delay: STORY.clouds + 0.04 },
+    drift: 'animate-cloud-drift-front',
   },
-]
+].map((cloud, index) => ({ ...cloud, enterAt: STORY.clouds + index * STORY.cloudStagger }))
 
 export function SkyBackground({ playing }: { playing: boolean }) {
+  const reduceMotion = useReducedMotion()
+
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      <motion.div
-        variants={skyIn}
-        className="absolute inset-x-0 top-0 h-[calc(var(--safe-top)+245px)] origin-top bg-sky will-change-transform"
-      />
-      {CLOUDS.map(({ src, frame, drift, bob, from }) => (
+      <motion.div variants={skyIn} className="absolute inset-x-0 top-0 h-[calc(var(--safe-top)+245px)] bg-sky">
+        {/* Daybreak: the page color slides away downwards, so the blue spreads from the top. */}
+        {!reduceMotion && (
+          <div
+            className={`absolute inset-x-0 top-0 h-[200%] bg-veil will-change-transform [transform:translateY(-40%)] ${playing ? 'animate-sky-veil' : ''}`}
+            style={delay(STORY.sky)}
+          />
+        )}
+      </motion.div>
+
+      {CLOUDS.map(({ src, frame, drift, enterAt }) => (
         <motion.div
           key={src + frame}
           variants={cloudIn}
-          custom={from}
+          custom={{ delay: enterAt }}
           className={`absolute ${frame} will-change-transform`}
         >
-          <div className={`size-full ${playing ? 'animate-cloud-bump' : ''}`} style={delay(STORY.owlLands)}>
-            <div className={`size-full ${drift}`}>
-              <img src={src} alt="" className={`size-full max-w-none animate-cloud-bob ${bob}`} />
-            </div>
+          <div className={`size-full ${playing ? drift : ''}`} style={delay(enterAt + STORY.cloudRise)}>
+            <img
+              src={src}
+              alt=""
+              className={`size-full max-w-none ${playing ? 'animate-cloud-bob' : ''}`}
+              style={delay(enterAt + STORY.cloudRise)}
+            />
           </div>
         </motion.div>
       ))}

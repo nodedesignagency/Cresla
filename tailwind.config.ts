@@ -118,6 +118,8 @@ export default {
           'radial-gradient(closest-side, #8a6614 0%, rgba(138,102,20,0) 100%)',
           'linear-gradient(90deg, #a07a1c 0%, #c9a43d 50%, #a07a1c 100%)',
         ].join(', '),
+        // Daybreak veil: clear at the top, page color below. Slid down by `animate-sky-veil`.
+        veil: 'linear-gradient(180deg, rgba(242,244,248,0) 0%, #f2f4f8 40%, #f2f4f8 100%)',
         // Light streaming down the ray, and the glow it leaves around the mascot.
         stream: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0) 100%)',
         halo: 'radial-gradient(closest-side, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.35) 55%, rgba(255,255,255,0) 100%)',
@@ -129,11 +131,15 @@ export default {
       // Ambient loops run as CSS animations so iOS composites them off the main thread;
       // they stay smooth even while JavaScript is busy. Delays are set inline per element.
       keyframes: {
-        'cloud-drift-far': { from: { transform: 'translateX(-56px)' }, to: { transform: 'translateX(56px)' } },
-        'cloud-drift-back': { from: { transform: 'translateX(-38px)' }, to: { transform: 'translateX(38px)' } },
-        'cloud-drift-front': { from: { transform: 'translateX(-66px)' }, to: { transform: 'translateX(66px)' } },
+        // Drifts begin at the design position and at rest, so they pick up seamlessly from the
+        // clouds' entrance; all layers move the same way, the nearest furthest (parallax).
+        'cloud-drift-far': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-90px)' } },
+        'cloud-drift-back': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-70px)' } },
+        'cloud-drift-front': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-120px)' } },
         'cloud-bob': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-5px)' } },
-        'cloud-bump': { '0%, 100%': { transform: 'translateY(0)' }, '30%': { transform: 'translateY(7px)' } },
+        // Daybreak: a veil of the page color slides down off the sky, so the blue spreads from
+        // the top with a soft edge.
+        'sky-veil': { from: { transform: 'translateY(-40%)' }, to: { transform: 'translateY(50%)' } },
         'owl-float': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-7px)' } },
         'ray-sway': { from: { transform: 'rotate(-1.6deg)' }, to: { transform: 'rotate(1.6deg)' } },
         'ray-pulse': { from: { opacity: '0.5' }, to: { opacity: '0.32' } },
@@ -169,15 +175,15 @@ export default {
         },
         // Timeline: the lit capsule slides down while its contents counter-slide, so the
         // white icons stay put and are uncovered exactly as the leading edge reaches them.
-        // It rests on Today, glides to Day 2, rests, then glides to Day 3 (1s rests, 1.2s glides).
+        // It rests on Today, glides to Day 2, rests, then glides to Day 3 (1.8s rests, 1.6s glides).
         'rail-fill': {
-          '0%, 22.73%': { transform: 'translateY(-117px)' },
-          '50%, 72.73%': { transform: 'translateY(-58px)' },
+          '0%, 26.47%': { transform: 'translateY(-117px)' },
+          '50%, 76.47%': { transform: 'translateY(-58px)' },
           '100%': { transform: 'translateY(0)' },
         },
         'rail-counter': {
-          '0%, 22.73%': { transform: 'translateY(117px)' },
-          '50%, 72.73%': { transform: 'translateY(58px)' },
+          '0%, 26.47%': { transform: 'translateY(117px)' },
+          '50%, 76.47%': { transform: 'translateY(58px)' },
           '100%': { transform: 'translateY(0)' },
         },
         'rail-glint': { from: { transform: 'translateY(-60px)' }, to: { transform: 'translateY(180px)' } },
@@ -194,7 +200,7 @@ export default {
         'cloud-drift-back': 'cloud-drift-back 13s ease-in-out infinite alternate',
         'cloud-drift-front': 'cloud-drift-front 9s ease-in-out infinite alternate',
         'cloud-bob': 'cloud-bob 5.5s ease-in-out infinite alternate',
-        'cloud-bump': 'cloud-bump 1s cubic-bezier(0.3, 0, 0.2, 1) both',
+        'sky-veil': 'sky-veil 2.2s cubic-bezier(0.4, 0, 0.2, 1) both',
         'owl-float': 'owl-float 2.8s ease-in-out infinite alternate',
         'ray-sway': 'ray-sway 7s ease-in-out infinite alternate',
         'ray-pulse': 'ray-pulse 3.6s ease-in-out infinite alternate',
@@ -205,8 +211,8 @@ export default {
         'text-glint': 'text-glint 1.5s cubic-bezier(0.45, 0, 0.25, 1) both',
         'shine-sweep': 'shine-sweep 4.8s cubic-bezier(0.45, 0, 0.25, 1) infinite',
         twinkle: 'twinkle 4s ease-out infinite',
-        'rail-fill': 'rail-fill 4.4s cubic-bezier(0.65, 0, 0.35, 1) both',
-        'rail-counter': 'rail-counter 4.4s cubic-bezier(0.65, 0, 0.35, 1) both',
+        'rail-fill': 'rail-fill 6.8s cubic-bezier(0.65, 0, 0.35, 1) both',
+        'rail-counter': 'rail-counter 6.8s cubic-bezier(0.65, 0, 0.35, 1) both',
         'rail-glint': 'rail-glint 1.1s cubic-bezier(0.45, 0, 0.3, 1) both',
         'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
         'row-lit': 'row-lit 0.5s ease-out both',

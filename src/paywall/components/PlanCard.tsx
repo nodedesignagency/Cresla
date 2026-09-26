@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { cardIn, popIn, selectSpring } from '../motion'
+import { cardIn, popIn } from '../motion'
 import { GlossBadge } from './GlossBadge'
 import { Radio } from './Radio'
 import { Sparkles } from './Sparkles'
@@ -59,16 +59,11 @@ export function PlanCard({
           </span>
         </span>
 
-        {/* Selection ring glides between cards (shared layoutId within the parent LayoutGroup). */}
-        {selected && (
-          <motion.span
-            layoutId="plan-ring"
-            aria-hidden
-            className="pointer-events-none absolute inset-0 border border-brand"
-            style={{ borderRadius: 18 }}
-            transition={selectSpring}
-          />
-        )}
+        {/* Selection ring: simply fades in on the chosen card and out on the other. */}
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 rounded-card border border-brand transition-opacity duration-200 ease-out ${selected ? 'opacity-100' : 'opacity-0'}`}
+        />
 
         {badge && (
           <motion.span variants={popIn} custom={badgeAt} className="absolute -top-[11px] right-[12.5px]">

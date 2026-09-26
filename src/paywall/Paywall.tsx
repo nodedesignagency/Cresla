@@ -1,5 +1,5 @@
-import { LayoutGroup, motion, MotionConfig, useReducedMotion } from 'framer-motion'
-import { useEffect, useId, useState, type CSSProperties } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useEffect, useState, type CSSProperties } from 'react'
 import bureausIcon from '../assets/icon-bureaus.svg'
 import lettersIcon from '../assets/icon-letters.svg'
 import supportIcon from '../assets/icon-support.svg'
@@ -53,7 +53,6 @@ export function Paywall({
 }: PaywallProps) {
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(defaultPlan)
   const plan = PLANS[selectedPlan]
-  const planGroupId = useId()
   const reduceMotion = useReducedMotion()
 
   // The intro starts once the mascot image is ready (so it never pops in mid-drop), or
@@ -71,152 +70,148 @@ export function Paywall({
   }, [introStarted])
 
   return (
-    <MotionConfig reducedMotion="user">
-      <motion.div
-        style={rootStyle}
-        // With Reduce Motion on, everything simply appears in place and no loops run.
-        initial={reduceMotion ? false : 'hidden'}
-        animate={introStarted || reduceMotion ? 'show' : 'hidden'}
-        className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none motion-reduce:**:animate-none!"
-        // iOS only applies :active (the press feedback) when a touch listener is present.
-        onTouchStart={() => {}}
-      >
-        <SkyBackground playing={introStarted} />
-        <LightRays />
+    <motion.div
+      style={rootStyle}
+      // With Reduce Motion on, everything simply appears in place and no loops run.
+      initial={reduceMotion ? false : 'hidden'}
+      animate={introStarted || reduceMotion ? 'show' : 'hidden'}
+      className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none motion-reduce:**:animate-none!"
+      // iOS only applies :active (the press feedback) when a touch listener is present.
+      onTouchStart={() => {}}
+    >
+      <SkyBackground playing={introStarted} />
+      <LightRays />
 
-        <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)] pb-[max(calc(var(--safe-bottom)-20px),14px)]">
-          <motion.div
-            variants={fadeIn}
-            custom={STORY.subline}
-            className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20"
+      <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)] pb-[max(calc(var(--safe-bottom)-20px),14px)]">
+        <motion.div
+          variants={fadeIn}
+          custom={STORY.subline}
+          className="absolute top-[calc(var(--safe-top)+13px)] right-gutter z-20"
+        >
+          <button
+            type="button"
+            onClick={onSignIn}
+            className={`${hitArea} ${focusRing} cursor-pointer rounded-full bg-white/70 px-2.5 py-1.5 text-button font-medium transition-opacity active:opacity-60`}
           >
-            <button
-              type="button"
-              onClick={onSignIn}
-              className={`${hitArea} ${focusRing} cursor-pointer rounded-full bg-white/70 px-2.5 py-1.5 text-button font-medium transition-opacity active:opacity-60`}
-            >
-              Sign In
-            </button>
-          </motion.div>
+            Sign In
+          </button>
+        </motion.div>
 
-          <header className="flex flex-col items-center gap-0.5">
-            <OwlMascot onReady={() => setIntroStarted(true)} playing={introStarted} />
-            <div className="flex w-full flex-col items-center gap-[18px]">
-              <h1 className="-my-trim-display flex flex-col items-center text-center text-display font-medium">
-                <motion.span variants={focusIn} custom={STORY.headline} className="whitespace-nowrap">
-                  Dispute letters that
-                </motion.span>
-                <motion.span variants={focusIn} custom={STORY.headline + 0.1} className="whitespace-nowrap">
-                  get results.{' '}
-                  <span
-                    className={`bg-headline-glint bg-[length:250%_100%,100%_100%] bg-[position:160%_0,0_0] bg-no-repeat bg-clip-text text-transparent ${introStarted ? 'animate-text-glint' : ''}`}
-                    style={delay(STORY.settled - 0.2)}
-                  >
-                    Free for 3 days.
-                  </span>
-                </motion.span>
-              </h1>
-              <div className="flex items-center justify-center gap-1">
-                <motion.p
-                  variants={focusIn}
-                  custom={STORY.subline}
-                  className="-my-trim-label text-label whitespace-nowrap"
+        <header className="flex flex-col items-center gap-0.5">
+          <OwlMascot onReady={() => setIntroStarted(true)} playing={introStarted} />
+          <div className="flex w-full flex-col items-center gap-[18px]">
+            <h1 className="-my-trim-display flex flex-col items-center text-center text-display font-medium">
+              <motion.span variants={focusIn} custom={STORY.headline} className="whitespace-nowrap">
+                Dispute letters that
+              </motion.span>
+              <motion.span variants={focusIn} custom={STORY.headline + 0.1} className="whitespace-nowrap">
+                get results.{' '}
+                <span
+                  className={`bg-headline-glint bg-[length:250%_100%,100%_100%] bg-[position:160%_0,0_0] bg-no-repeat bg-clip-text text-transparent ${introStarted ? 'animate-text-glint' : ''}`}
+                  style={delay(STORY.settled - 0.2)}
                 >
-                  Everything unlocked.
-                </motion.p>
-                <motion.span variants={popIn} custom={STORY.subline + 0.15}>
-                  <GlossBadge tone="success">No Charge Today</GlossBadge>
-                </motion.span>
-              </div>
+                  Free for 3 days.
+                </span>
+              </motion.span>
+            </h1>
+            <div className="flex items-center justify-center gap-1">
+              <motion.p
+                variants={focusIn}
+                custom={STORY.subline}
+                className="-my-trim-label text-label whitespace-nowrap"
+              >
+                Everything unlocked.
+              </motion.p>
+              <motion.span variants={popIn} custom={STORY.subline + 0.15}>
+                <GlossBadge tone="success">No Charge Today</GlossBadge>
+              </motion.span>
             </div>
-          </header>
+          </div>
+        </header>
 
-          <motion.section
-            variants={cardIn}
-            custom={STORY.trial}
-            aria-labelledby="trial-heading"
-            className="mt-2.5 flex flex-col gap-1 rounded-card bg-white p-1 shadow-card"
+        <motion.section
+          variants={cardIn}
+          custom={STORY.trial}
+          aria-labelledby="trial-heading"
+          className="mt-2.5 flex flex-col gap-1 rounded-card bg-white p-1 shadow-card"
+        >
+          <motion.h2
+            variants={itemIn}
+            custom={STORY.trialItems - STORY.step}
+            id="trial-heading"
+            className="flex justify-center py-2"
           >
-            <motion.h2
-              variants={itemIn}
-              custom={STORY.trialItems - STORY.step}
-              id="trial-heading"
-              className="flex justify-center py-2"
-            >
-              <GoldText className="-my-trim-label text-label font-medium">HOW YOUR FREE TRIAL WORKS</GoldText>
-            </motion.h2>
-            <TrialTimeline steps={TIMELINE} playing={introStarted} />
-            <motion.ul
-              variants={itemIn}
-              custom={STORY.trialItems + 3 * STORY.step}
-              className="flex items-center justify-between"
-            >
-              <PerkItem icon={bureausIcon} label="All 3 Bureaus" />
-              <PerkDivider />
-              <PerkItem icon={lettersIcon} label="Unlimited letters" />
-              <PerkDivider />
-              <PerkItem icon={supportIcon} label="Priority Support" />
-            </motion.ul>
-          </motion.section>
-
-          {/* Absorbs extra height so the purchase block stays anchored to the bottom. */}
-          <div className="min-h-[17px] flex-1" />
-
-          <LayoutGroup id={planGroupId}>
-            <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
-              {PLAN_ORDER.map((id, index) => {
-                const option = PLANS[id]
-                return (
-                  <PlanCard
-                    key={id}
-                    name="paywall-plan"
-                    value={id}
-                    label={option.label}
-                    trial={option.trial}
-                    price={option.price}
-                    priceNote={option.priceNote}
-                    badge={option.badge}
-                    selected={id === selectedPlan}
-                    onSelect={() => setSelectedPlan(id)}
-                    sparkle={id === 'annual' && introSettled}
-                    enterAt={STORY.plans + index * STORY.step}
-                    badgeAt={STORY.saveBadge}
-                  />
-                )
-              })}
-            </div>
-          </LayoutGroup>
-
-          <motion.div variants={cardIn} custom={STORY.cta} className="mt-2">
-            <PrimaryButton
-              title="Start My FREE 3-Day Trial"
-              details={['No charge today', plan.ctaPrice]}
-              onClick={() => onSubscribe(plan)}
-              shine={introSettled}
-            />
-          </motion.div>
-
-          <motion.footer
-            variants={fadeIn}
-            custom={STORY.footer}
-            className="mt-3 flex flex-col items-center gap-3 text-caption text-muted"
+            <GoldText className="-my-trim-label text-label font-medium">HOW YOUR FREE TRIAL WORKS</GoldText>
+          </motion.h2>
+          <TrialTimeline steps={TIMELINE} playing={introStarted} />
+          <motion.ul
+            variants={itemIn}
+            custom={STORY.trialItems + 3 * STORY.step}
+            className="flex items-center justify-between"
           >
-            <p className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
-              <span>Cancel anytime</span>
-              <FooterDot />
-              <span>Auto-renews until canceled</span>
-            </p>
-            <nav className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
-              <FooterLink onClick={onOpenTerms}>Terms of use</FooterLink>
-              <FooterDot />
-              <FooterLink onClick={onOpenPrivacy}>Privacy Policy</FooterLink>
-              <FooterDot />
-              <FooterLink onClick={onRestore}>Restore</FooterLink>
-            </nav>
-          </motion.footer>
+            <PerkItem icon={bureausIcon} label="All 3 Bureaus" />
+            <PerkDivider />
+            <PerkItem icon={lettersIcon} label="Unlimited letters" />
+            <PerkDivider />
+            <PerkItem icon={supportIcon} label="Priority Support" />
+          </motion.ul>
+        </motion.section>
+
+        {/* Absorbs extra height so the purchase block stays anchored to the bottom. */}
+        <div className="min-h-[17px] flex-1" />
+
+        <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
+          {PLAN_ORDER.map((id, index) => {
+            const option = PLANS[id]
+            return (
+              <PlanCard
+                key={id}
+                name="paywall-plan"
+                value={id}
+                label={option.label}
+                trial={option.trial}
+                price={option.price}
+                priceNote={option.priceNote}
+                badge={option.badge}
+                selected={id === selectedPlan}
+                onSelect={() => setSelectedPlan(id)}
+                sparkle={id === 'annual' && introSettled}
+                enterAt={STORY.plans + index * STORY.step}
+                badgeAt={STORY.saveBadge}
+              />
+            )
+          })}
         </div>
-      </motion.div>
-    </MotionConfig>
+
+        <motion.div variants={cardIn} custom={STORY.cta} className="mt-2">
+          <PrimaryButton
+            title="Start My FREE 3-Day Trial"
+            details={['No charge today', plan.ctaPrice]}
+            onClick={() => onSubscribe(plan)}
+            shine={introSettled}
+          />
+        </motion.div>
+
+        <motion.footer
+          variants={fadeIn}
+          custom={STORY.footer}
+          className="mt-3 flex flex-col items-center gap-3 text-caption text-muted"
+        >
+          <p className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
+            <span>Cancel anytime</span>
+            <FooterDot />
+            <span>Auto-renews until canceled</span>
+          </p>
+          <nav className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
+            <FooterLink onClick={onOpenTerms}>Terms of use</FooterLink>
+            <FooterDot />
+            <FooterLink onClick={onOpenPrivacy}>Privacy Policy</FooterLink>
+            <FooterDot />
+            <FooterLink onClick={onRestore}>Restore</FooterLink>
+          </nav>
+        </motion.footer>
+      </div>
+    </motion.div>
   )
 }
 

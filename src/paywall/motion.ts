@@ -11,24 +11,29 @@ export const easeOutExpo: BezierDefinition = [0.16, 1, 0.3, 1]
 
 /** Intro storyboard, in seconds from the moment the mascot image is ready. */
 export const STORY = {
+  /** Daybreak: the sky fades up and spreads down from the top. */
   sky: 0,
-  clouds: 0.05,
-  rays: 0.3,
-  owl: 0.35,
-  /** Owl touches down: clouds dip, halo blooms, float begins. */
-  owlLands: 0.9,
-  headline: 0.6,
-  subline: 0.78,
-  trial: 0.86,
+  /** First cloud layer; the others follow `cloudStagger` apart. */
+  clouds: 0.5,
+  cloudStagger: 0.15,
+  /** How long each cloud takes to rise into place (its drift starts after). */
+  cloudRise: 2.2,
+  rays: 0.6,
+  owl: 0.75,
+  /** Owl touches down: halo blooms, float begins. */
+  owlLands: 1.3,
+  headline: 1.0,
+  subline: 1.18,
+  trial: 1.25,
   /** First row inside the trial card; later rows follow every `step`. */
-  trialItems: 1.0,
-  plans: 1.0,
-  cta: 1.12,
-  saveBadge: 1.35,
-  footer: 1.25,
-  timeline: 1.45,
+  trialItems: 1.4,
+  plans: 1.45,
+  cta: 1.57,
+  saveBadge: 1.8,
+  footer: 1.7,
+  timeline: 1.9,
   /** Everything has landed; ambient details (sparkles, CTA shine) start. */
-  settled: 1.8,
+  settled: 2.3,
   step: 0.06,
 } as const
 
@@ -39,31 +44,21 @@ const spring = (duration: number, bounce: number, delay: number): Transition => 
   delay,
 })
 
-/** Sky settles from slightly zoomed in, like a camera easing back. Origin: top. */
+/** Daybreak: the blue slowly deepens out of the page color (paired with the CSS veil sweep). */
 export const skyIn: Variants = {
-  hidden: { opacity: 0, transform: 'scale(1.18)' },
-  show: {
-    opacity: 1,
-    transform: 'scale(1)',
-    transition: {
-      opacity: { duration: 0.8, ease: easeOut, delay: STORY.sky },
-      transform: { duration: 1.8, ease: easeOutExpo, delay: STORY.sky },
-    },
-  },
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 1.6, ease: [0.4, 0, 0.2, 1], delay: STORY.sky } },
 }
 
-/** Clouds part: each glides in from off to its side while shrinking into place. */
+/** Clouds rise gently into place while fading in. Pass `{ delay }` with `custom`. */
 export const cloudIn: Variants = {
-  hidden: (from: { x: number; delay: number }) => ({
-    opacity: 0,
-    transform: `translateX(${from.x}px) scale(1.3)`,
-  }),
-  show: (from: { x: number; delay: number }) => ({
+  hidden: { opacity: 0, transform: 'translateY(36px)' },
+  show: ({ delay }: { delay: number }) => ({
     opacity: 1,
-    transform: 'translateX(0px) scale(1)',
+    transform: 'translateY(0px)',
     transition: {
-      opacity: { duration: 0.7, ease: easeOut, delay: from.delay },
-      transform: { duration: 1.9, ease: easeOutExpo, delay: from.delay },
+      opacity: { duration: 1.4, ease: easeOut, delay },
+      transform: { duration: STORY.cloudRise, ease: easeOut, delay },
     },
   }),
 }
@@ -162,9 +157,6 @@ export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   show: (delay: number) => ({ opacity: 1, transition: { duration: 0.8, ease: easeOut, delay } }),
 }
-
-/** Plan selection ring and radio. */
-export const selectSpring: Transition = { type: 'spring', bounce: 0.2, duration: 0.5 }
 
 /** Inline style for a CSS animation that should start `seconds` after it is applied. */
 export const delay = (seconds: number) => ({ animationDelay: `${seconds}s` })
