@@ -119,7 +119,8 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 
 | File | Used for | Current file | Notes |
 |---|---|---|---|
-| `owl.png` | Mascot | Draft owl from Figma, 697×724 | **Swap for the final owl.** Transparent PNG at about a 154:160 aspect ratio; it's shown at 154×160pt. The drop-in and float animations are already applied. |
+| `owl-loop.mp4` | Mascot animation (5s seamless loop) | Generated with Magnific (Seedance 2.5) from `owl.png` on green, keyed with `scripts/make-alpha-video.mjs` | "Stacked alpha" video: colour on top, transparency mask below, 720×1440. See [Mascot video](#mascot-video) |
+| `owl.png` | Mascot still: shown during the drop-in, while the video loads, and when video can't play or Reduce Motion is on | Owl from Figma, 697×724 | Must be the video's first frame, at the same size and position, so the swap is invisible |
 | `cloud-1.png` | Back cloud layer | From Figma, 2048×1138 | Shown at 889×494pt |
 | `cloud-2.png` | Front cloud layer | From Figma (same image) | Shown at 889×494pt |
 | `cloud-3.png` | Far, faint cloud layer (adds depth) | Same image | Shown at 600×333pt, 45% opacity |
@@ -132,6 +133,28 @@ Drawn in code, not files: the sparkle stars on the Annual card (the 4-point star
 "spark" component, `components/Sparkles.tsx`) and the flowing gold of the "HOW YOUR FREE TRIAL
 WORKS" heading (the `gold-mesh` gradient in `tailwind.config.ts`).
 
+## Mascot video
+
+The owl is `src/assets/owl-loop.mp4`, played by `components/AlphaVideo.tsx`. iPhones can't show
+transparent video in a web view (only Apple's HEVC-with-alpha, which Chrome can't play), so the
+file is a plain H.264 MP4 with the colour in the top half and the transparency mask in the bottom
+half. A small WebGL canvas combines them into a transparent owl, using hardware video decoding on
+every device.
+
+To make a new loop:
+
+1. Put the still owl on a pure green (#00FF00) square, centred at about 60% of the width.
+2. Generate a 5s silent 1:1 video with that image as both the start and end frame, a locked
+   static camera, and a prompt that keeps the background flat green.
+3. Key it and encode it (needs ffmpeg: `brew install ffmpeg`):
+
+   ```bash
+   node scripts/make-alpha-video.mjs path/to/green-screen.mov src/assets/owl-loop.mp4
+   ```
+
+4. If the owl's framing changed, update the canvas size and position in `components/OwlMascot.tsx`
+   so the video's first frame sits exactly over `owl.png`.
+
 ## Motion
 
 Every animation runs on the GPU compositor, so it stays smooth on iOS even while JavaScript is busy:
@@ -139,7 +162,7 @@ Every animation runs on the GPU compositor, so it stays smooth on iOS even while
 - **Intro** (Framer Motion): the storyboard and its timings are in `STORY` in `src/paywall/motion.ts`.
   It only animates whole `transform`, `opacity` and `filter` values, which Framer hands to the browser.
   Avoid `x`/`y`/`scale` shorthands, `height` and similar, because those run in JavaScript on every frame.
-- **Loops and one-offs** (clouds, rays, owl float, timeline fill, shine, sparkles, gold): CSS
+- **Loops and one-offs** (clouds, rays, halo, timeline fill, shine, sparkles, gold): CSS
   animations defined under `keyframes` / `animation` in `tailwind.config.ts`.
 
 With the system's Reduce Motion setting on, everything appears in place, nothing loops, and the

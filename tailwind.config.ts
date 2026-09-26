@@ -140,7 +140,6 @@ export default {
         // Daybreak: a veil of the page color slides down off the sky, so the blue spreads from
         // the top with a soft edge.
         'sky-veil': { from: { transform: 'translateY(-40%)' }, to: { transform: 'translateY(50%)' } },
-        'owl-float': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-7px)' } },
         'ray-sway': { from: { transform: 'rotate(-1.6deg)' }, to: { transform: 'rotate(1.6deg)' } },
         'ray-pulse': { from: { opacity: '0.5' }, to: { opacity: '0.32' } },
         'ray-stream': { from: { transform: 'translateY(-100%)' }, to: { transform: 'translateY(220%)' } },
@@ -201,7 +200,6 @@ export default {
         'cloud-drift-front': 'cloud-drift-front 9s ease-in-out infinite alternate',
         'cloud-bob': 'cloud-bob 5.5s ease-in-out infinite alternate',
         'sky-veil': 'sky-veil 2.2s cubic-bezier(0.4, 0, 0.2, 1) both',
-        'owl-float': 'owl-float 2.8s ease-in-out infinite alternate',
         'ray-sway': 'ray-sway 7s ease-in-out infinite alternate',
         'ray-pulse': 'ray-pulse 3.6s ease-in-out infinite alternate',
         'ray-stream': 'ray-stream 3.4s cubic-bezier(0.4, 0, 0.7, 1) infinite',
