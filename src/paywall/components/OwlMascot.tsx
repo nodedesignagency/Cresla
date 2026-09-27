@@ -9,7 +9,10 @@ import { haloIn, owlDrop, STORY } from '../motion'
 import { AlphaVideo } from './AlphaVideo'
 
 interface OwlMascotProps {
-  /** Fires when the still image is ready (or failed), so the intro never starts on a blank mascot. */
+  /**
+   * Fires once the still image has loaded and the video has warmed up (or either has failed), so
+   * the intro never starts on a blank mascot and the video's start-up never lands mid-animation.
+   */
   onReady?: () => void
   /** The intro is running; the loop starts once the owl has landed. */
   playing: boolean
@@ -17,6 +20,7 @@ interface OwlMascotProps {
 
 export function OwlMascot({ onReady, playing }: OwlMascotProps) {
   const reduceMotion = useReducedMotion()
+  const [stillReady, setStillReady] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
   const [looping, setLooping] = useState(false)
@@ -29,6 +33,11 @@ export function OwlMascot({ onReady, playing }: OwlMascotProps) {
 
   const useVideo = !reduceMotion && !videoFailed
   const showVideo = useVideo && videoReady
+
+  const ready = stillReady && (showVideo || !useVideo)
+  useEffect(() => {
+    if (ready) onReady?.()
+  }, [ready, onReady])
 
   return (
     // Sized by --owl (1 normally; smaller on short screens, set on the Paywall root).
@@ -47,8 +56,8 @@ export function OwlMascot({ onReady, playing }: OwlMascotProps) {
           src={owl}
           alt=""
           draggable={false}
-          onLoad={onReady}
-          onError={onReady}
+          onLoad={() => setStillReady(true)}
+          onError={() => setStillReady(true)}
           className={`size-full object-contain select-none ${showVideo ? 'invisible' : ''}`}
         />
         {useVideo && (

@@ -7,9 +7,9 @@ interface AlphaVideoProps {
    * including iOS, which can't otherwise show transparent video in a web view.
    */
   src: string
-  /** Start (or resume) playback. The first frame is drawn as soon as it's available. */
+  /** Start (or resume) playback. Until then the video is warmed up and rests on its first frame. */
   playing: boolean
-  /** Fires once the first frame is on screen. */
+  /** Fires once the video has warmed up and its first frame is on screen. */
   onReady?: () => void
   /** Fires if the video or WebGL can't be used, so the caller can keep a still image. */
   onError?: () => void
@@ -43,6 +43,8 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
   const videoRef = useRef<HTMLVideoElement>(null)
   const callbacks = useRef({ onReady, onError })
   callbacks.current = { onReady, onError }
+  const playingRef = useRef(playing)
+  playingRef.current = playing
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -85,6 +87,7 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
+    let warmingUp = false
     let ready = false
     let stopped = false
     let frameRequest = 0
@@ -100,10 +103,12 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
       gl.clearColor(0, 0, 0, 0)
       gl.clear(gl.COLOR_BUFFER_BIT)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-      if (!ready) {
-        ready = true
-        callbacks.current.onReady?.()
-      }
+    }
+
+    const markReady = () => {
+      if (ready || stopped) return
+      ready = true
+      callbacks.current.onReady?.()
     }
 
     // Redraw only when the video presents a new frame (about 30 times a second).
@@ -113,17 +118,45 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
       frameRequest = hasFrameCallback ? video.requestVideoFrameCallback(loop) : requestAnimationFrame(loop)
     }
 
+    const onFail = () => callbacks.current.onError?.()
+
+    // Play for a moment, then rewind to the first frame. The first play() sets up the decoder and
+    // media pipeline, which can stall the page (for about a second in the iOS Simulator). Doing it
+    // now, before the caller starts its intro, keeps that stall out of the animation.
+    const warmUp = () => {
+      if (warmingUp) return
+      warmingUp = true
+      const rewind = () => {
+        if (stopped) return
+        if (playingRef.current) return markReady()
+        video.pause()
+        video.currentTime = 0 // 'seeked' then draws the first frame and marks the video ready
+      }
+      video.muted = true
+      video.play().then(() => {
+        if (stopped) return
+        // play() can resolve before playback has really begun; wait until a new frame is shown.
+        if (hasFrameCallback) video.requestVideoFrameCallback(rewind)
+        else setTimeout(rewind, 100)
+      }, onFail)
+    }
+
     const onLoaded = () => {
       draw()
       loop()
+      warmUp()
     }
-    const onFail = () => callbacks.current.onError?.()
+    const onSeeked = () => {
+      draw()
+      markReady()
+    }
     const onLost = (event: Event) => {
       event.preventDefault()
       onFail()
     }
 
     video.addEventListener('loadeddata', onLoaded)
+    video.addEventListener('seeked', onSeeked)
     video.addEventListener('error', onFail)
     canvas.addEventListener('webglcontextlost', onLost)
     if (video.readyState >= 2) onLoaded()
@@ -133,6 +166,7 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
       if (hasFrameCallback) video.cancelVideoFrameCallback(frameRequest)
       else cancelAnimationFrame(frameRequest)
       video.removeEventListener('loadeddata', onLoaded)
+      video.removeEventListener('seeked', onSeeked)
       video.removeEventListener('error', onFail)
       canvas.removeEventListener('webglcontextlost', onLost)
       gl.deleteTexture(texture)
@@ -141,16 +175,14 @@ export function AlphaVideo({ src, playing, onReady, onError, className = '' }: A
     }
   }, [src])
 
+  // Only pauses playback it started, so it never interrupts the warm-up.
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
-    if (!playing) {
-      video.pause()
-      return
-    }
+    if (!video || !playing) return
     // iOS only autoplays inline video that is muted; set it on the element, not just the prop.
     video.muted = true
     video.play().catch(() => callbacks.current.onError?.())
+    return () => video.pause()
   }, [playing, src])
 
   return (

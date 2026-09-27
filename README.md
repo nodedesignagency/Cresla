@@ -23,7 +23,7 @@ The first Simulator build takes a few minutes; later runs are much faster.
 To pull the latest changes and run them:
 
 ```bash
-cd ~/Cresla && git fetch origin && git checkout claude/charming-hawking-ilb5hy && git pull && ./scripts/run.sh
+cd ~/Cresla && git fetch origin && git checkout main && git pull && ./scripts/run.sh
 ```
 
 The sections below do the same steps by hand.
@@ -161,6 +161,10 @@ transparent video in a web view (only Apple's HEVC-with-alpha, which Chrome can'
 file is a plain H.264 MP4 with the colour in the top half and the transparency mask in the bottom
 half. A small WebGL canvas combines them into a transparent owl, using hardware video decoding on
 every device.
+
+Starting a video for the first time can stall the page for a moment while iOS sets up playback
+(up to about a second in the Simulator). So before the intro begins, `AlphaVideo` warms the video
+up: it plays one frame, then rewinds to the first. The intro waits for that, for up to 1.2s.
 
 To make a new loop:
 

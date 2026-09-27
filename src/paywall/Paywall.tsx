@@ -55,8 +55,9 @@ export function Paywall({
   const plan = PLANS[selectedPlan]
   const reduceMotion = useReducedMotion()
 
-  // The intro starts once the mascot image is ready (so it never pops in mid-drop), or
-  // after 1.2s regardless. Ambient details wait until everything has landed.
+  // The intro starts once the mascot is ready (its image loaded, so it never pops in mid-drop, and
+  // its video warmed up, so the video's start-up never stalls the animation), or after 1.2s
+  // regardless. Ambient details wait until everything has landed.
   const [introStarted, setIntroStarted] = useState(false)
   const [introSettled, setIntroSettled] = useState(false)
   useEffect(() => {
