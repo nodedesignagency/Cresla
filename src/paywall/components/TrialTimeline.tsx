@@ -1,6 +1,8 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import type { CSSProperties } from 'react'
+import bellBlueIcon from '../../assets/icon-bell-blue.png'
 import bellIcon from '../../assets/icon-bell.png'
+import hourglassBlueIcon from '../../assets/icon-hourglass-blue.png'
 import hourglassIcon from '../../assets/icon-hourglass.png'
 import lockIcon from '../../assets/icon-lock.png'
 import { delay, itemIn, STORY } from '../motion'
@@ -34,7 +36,7 @@ export function TrialTimeline({ steps, playing = true }: TrialTimelineProps) {
   }
 
   return (
-    <ol className="relative flex flex-col gap-5 rounded-panel bg-canvas px-3 py-5">
+    <ol className="relative flex flex-col gap-5 rounded-panel bg-canvas px-3 py-5 compact:py-4 tiny:py-3">
       {steps.map((step, index) => {
         const light = rowLight(index)
         return (
@@ -46,7 +48,7 @@ export function TrialTimeline({ steps, playing = true }: TrialTimelineProps) {
           >
             <span aria-hidden className="h-8 w-6 shrink-0" />
             <div className={`flex min-w-0 flex-1 flex-col gap-3 ${light.className ?? ''}`} style={light.style}>
-              <p className="-my-trim-title text-title font-medium text-ink">{step.title}</p>
+              <p className="-my-trim-title text-title font-medium text-ink narrow:text-[14px]">{step.title}</p>
               <p className="-my-trim-caption text-caption text-muted">{step.body}</p>
             </div>
           </motion.li>
@@ -77,14 +79,9 @@ function TimelineRail({ playing }: { playing: boolean }) {
     >
       {/* Unlit track */}
       <RailDots count={4} top={42} className="bg-brand/40" />
-      <MaskIcon src={bellIcon} top={59} className="bg-brand" />
+      <RailIcon src={bellBlueIcon} top={59} />
       <RailDots count={5} top={89} className="bg-brand/40" />
-      <MaskIcon
-        src={hourglassIcon}
-        top={117}
-        className="bg-icon"
-        style={{ backgroundSize: '47px 38px', backgroundPosition: '-10px -6px' }}
-      />
+      <RailIcon src={hourglassBlueIcon} top={117} />
 
       {/* Lit capsule: starts as the "Today" node and grows to Day 3 */}
       <span
@@ -95,21 +92,19 @@ function TimelineRail({ playing }: { playing: boolean }) {
           className={`absolute inset-0 will-change-transform ${animate ? 'animate-rail-counter' : ''}`}
           style={{ transform: reduceMotion ? 'none' : 'translateY(117px)', ...at(0) }}
         >
-          <span className="absolute top-[13px] left-[3px] size-3 overflow-hidden drop-shadow-icon">
-            <img src={lockIcon} alt="" className="absolute top-[-22.95%] left-[-21.37%] size-[140.72%] max-w-none" />
-          </span>
+          <RailIcon src={lockIcon} top={0} className="drop-shadow-icon" />
           <RailDots count={4} top={42} className="bg-white/60" />
-          <MaskIcon
+          <RailIcon
             src={bellIcon}
             top={59}
-            className={`bg-white ${animate ? 'animate-icon-pop' : ''}`}
+            className={animate ? 'animate-icon-pop' : ''}
             style={at(REACH.bell - 0.08)}
           />
           <RailDots count={5} top={89} className="bg-white/60" />
-          <MaskIcon
+          <RailIcon
             src={hourglassIcon}
             top={117}
-            className={`bg-white ${animate ? 'animate-icon-pop' : ''}`}
+            className={animate ? 'animate-icon-pop' : ''}
             style={at(REACH.hourglass - 0.08)}
           />
         </span>
@@ -136,21 +131,23 @@ function RailDots({ count, top, className }: { count: number; top: number; class
   )
 }
 
-interface MaskIconProps {
+interface RailIconProps {
   src: string
   /** Top of the 37px node the icon is centred in. */
   top: number
-  className: string
+  className?: string
   style?: CSSProperties
 }
 
-/** 12×12 icon drawn from an alpha mask so its fill can be a color or gradient. */
-function MaskIcon({ src, top, className, style }: MaskIconProps) {
-  const mask = `url(${src}) center / 12px 12px no-repeat`
+/** 12×12 icon centred in a rail node. The PNGs are 48px (4×), so they stay sharp on every screen. */
+function RailIcon({ src, top, className = '', style }: RailIconProps) {
   return (
-    <span
-      className={`absolute left-[3px] size-3 ${className}`}
-      style={{ top: top + 13, WebkitMask: mask, mask, ...style }}
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      className={`absolute left-[3px] size-3 max-w-none ${className}`}
+      style={{ top: top + 13, ...style }}
     />
   )
 }

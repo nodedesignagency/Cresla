@@ -1,6 +1,14 @@
 @import 'tailwindcss';
 @config '../tailwind.config.ts';
 
+/* Screen-size tiers used by the paywall. Later ones win when several match. */
+@custom-variant compact (@media (max-height: 830px)); /* iPhone mini, X/XS/11 Pro */
+@custom-variant tiny (@media (max-height: 760px)); /* iPhone SE, 8 / 8 Plus, iPad mini landscape */
+@custom-variant narrow (@media (max-width: 359px)); /* Display Zoom, iPad Slide Over */
+@custom-variant tablet-wide (@media (min-width: 1200px) and (min-height: 1000px)); /* 13" iPad landscape */
+@custom-variant tablet (@media (min-width: 700px) and (min-height: 1100px)); /* iPad portrait */
+@custom-variant tablet-lg (@media (min-width: 1000px) and (min-height: 1300px)); /* 13" iPad portrait */
+
 @layer base {
   html,
   body,

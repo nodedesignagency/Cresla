@@ -106,9 +106,10 @@ import { Paywall } from './paywall'
 />
 ```
 
-Copy `src/paywall/`, `src/assets/` and the `theme.extend` tokens from `tailwind.config.ts`.
-The host app needs Tailwind v4, `framer-motion`, the Inter font (`@fontsource/inter` 400 and 500)
-and `viewport-fit=cover` in its viewport meta tag.
+Copy `src/paywall/`, `src/assets/`, the `theme.extend` tokens from `tailwind.config.ts` and the
+`@custom-variant` screen-size tiers from `src/index.css`. The host app needs Tailwind v4,
+`framer-motion`, the Inter font (`@fontsource/inter` 400 and 500) and `viewport-fit=cover` in its
+viewport meta tag.
 
 Safe areas come from `env(safe-area-inset-*)`. To override them, set
 `--paywall-safe-top` / `--paywall-safe-bottom` on a parent element.
@@ -125,13 +126,33 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 | `cloud-2.png` | Front cloud layer | From Figma (same image) | Shown at 889×494pt |
 | `cloud-3.png` | Far, faint cloud layer (adds depth) | Same image | Shown at 600×333pt, 45% opacity |
 | `light-ray-wide.svg`, `light-ray-core.svg`, `light-glow.svg` | Light beams | From Figma | |
-| `icon-lock.png` | Timeline, Today | From Figma | White icon on transparent |
-| `icon-bell.png`, `icon-hourglass.png` | Timeline, Day 2 and Day 3 | From Figma, 24×24 | Used as alpha masks, so only the shape matters; color comes from code |
-| `icon-bureaus.svg`, `icon-letters.svg`, `icon-support.svg` | Perk icons | From Figma, 16×16 | |
+| `icon-lock.png` | Timeline, Today (lit) | HD, 48×48 (4×) | White; shown at 12×12pt |
+| `icon-bell.png`, `icon-hourglass.png` | Timeline, Day 2 and Day 3 once lit | HD, 48×48 (4×) | White versions, on the blue fill |
+| `icon-bell-blue.png`, `icon-hourglass-blue.png` | Timeline, Day 2 and Day 3 before they're lit | HD, 48×48 (4×) | Blue versions, on the pale track |
+| `icon-lock-blue.png` | Not used yet | HD, 48×48 (4×) | Blue lock, kept for completeness |
+| `icon-bureaus.png`, `icon-letters.png`, `icon-support.png` | Perk icons | HD, 64×64 (4×) | Shown at 16×16pt |
 
 Drawn in code, not files: the sparkle stars on the Annual card (the 4-point star from the Figma
 "spark" component, `components/Sparkles.tsx`) and the flowing gold of the "HOW YOUR FREE TRIAL
 WORKS" heading (the `gold-mesh` gradient in `tailwind.config.ts`).
+
+## Screen sizes
+
+The layout is designed at 390×844 and adapts to every iPhone and iPad through tiers defined in
+`src/index.css` (`@custom-variant`) and used as Tailwind prefixes:
+
+| Tier | When | What changes |
+|---|---|---|
+| `compact:` | height ≤ 830pt (iPhone mini, X/XS/11 Pro) | Slightly smaller owl, tighter gaps |
+| `tiny:` | height ≤ 760pt (iPhone SE, 8, 8 Plus, iPad mini landscape) | Smaller owl and headline, tighter cards |
+| `narrow:` | width ≤ 359pt (Display Zoom, iPad Slide Over) | Smaller headline and small text |
+| `tablet-wide:` / `tablet:` / `tablet-lg:` | Large iPads | The whole layout is zoomed ×1.15 / ×1.3 / ×1.45 to fill the screen |
+
+The owl's size follows the `--owl` variable set by these tiers. If a screen is still too short
+(for example Display Zoom on an iPhone SE), the plans, button and footer stay pinned to the bottom
+and the content above scrolls under them, so the button is always visible.
+
+The app needs iOS 16.4 or newer (Tailwind CSS v4 relies on it), which covers iPhone 8/X and later.
 
 ## Mascot video
 

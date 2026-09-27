@@ -16,7 +16,7 @@ export function PrimaryButton({ title, details = [], onClick, shine = false }: P
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white shadow-cta transition-[scale,opacity] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.97] active:opacity-90 ${focusRing}`}
+      className={`relative flex w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-full bg-brand p-3 text-white tiny:py-2.5 shadow-cta transition-[scale,opacity] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.97] active:opacity-90 ${focusRing}`}
     >
       {shine && (
         <span

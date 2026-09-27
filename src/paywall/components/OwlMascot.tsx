@@ -31,12 +31,13 @@ export function OwlMascot({ onReady, playing }: OwlMascotProps) {
   const showVideo = useVideo && videoReady
 
   return (
-    <div className="relative h-[160px] w-[154px] shrink-0">
+    // Sized by --owl (1 normally; smaller on short screens, set on the Paywall root).
+    <div className="relative h-[calc(160px*var(--owl,1))] w-[calc(154px*var(--owl,1))] shrink-0">
       {/* Soft glow where the light lands */}
       <motion.div
         variants={haloIn}
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/2 -mt-[120px] -ml-[120px] size-[240px]"
+        className="pointer-events-none absolute top-1/2 left-1/2 -mt-[calc(120px*var(--owl,1))] -ml-[calc(120px*var(--owl,1))] size-[calc(240px*var(--owl,1))]"
       >
         <div className="size-full animate-halo-pulse rounded-full bg-halo" />
       </motion.div>
@@ -58,7 +59,7 @@ export function OwlMascot({ onReady, playing }: OwlMascotProps) {
             playing={looping}
             onReady={() => setVideoReady(true)}
             onError={() => setVideoFailed(true)}
-            className={`pointer-events-none absolute top-[-33.71px] left-[-34.97px] size-[224.82px] max-w-none ${showVideo ? '' : 'invisible'}`}
+            className={`pointer-events-none absolute top-[calc(-33.71px*var(--owl,1))] left-[calc(-34.97px*var(--owl,1))] size-[calc(224.82px*var(--owl,1))] max-w-none ${showVideo ? '' : 'invisible'}`}
           />
         )}
       </motion.div>

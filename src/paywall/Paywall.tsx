@@ -1,8 +1,8 @@
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState, type CSSProperties } from 'react'
-import bureausIcon from '../assets/icon-bureaus.svg'
-import lettersIcon from '../assets/icon-letters.svg'
-import supportIcon from '../assets/icon-support.svg'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import bureausIcon from '../assets/icon-bureaus.png'
+import lettersIcon from '../assets/icon-letters.png'
+import supportIcon from '../assets/icon-support.png'
 import { GlossBadge } from './components/GlossBadge'
 import { GoldText } from './components/GoldText'
 import { LightRays } from './components/LightRays'
@@ -69,20 +69,41 @@ export function Paywall({
     return () => clearTimeout(timer)
   }, [introStarted])
 
+  // On screens too short for everything, the purchase block sticks to the bottom and the
+  // content above scrolls under it; a soft fade then marks where it disappears.
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [overflowing, setOverflowing] = useState(false)
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const check = () => setOverflowing(root.getBoundingClientRect().height > window.innerHeight + 1)
+    const observer = new ResizeObserver(check)
+    observer.observe(root)
+    window.addEventListener('resize', check)
+    check()
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', check)
+    }
+  }, [])
+
   return (
     <motion.div
+      ref={rootRef}
       style={rootStyle}
       // With Reduce Motion on, everything simply appears in place and no loops run.
       initial={reduceMotion ? false : 'hidden'}
       animate={introStarted || reduceMotion ? 'show' : 'hidden'}
-      className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-canvas font-sans text-black select-none motion-reduce:**:animate-none!"
+      // Screen-size tiers (see src/index.css): --owl scales the mascot on short phones, and on
+      // tall iPads the whole layout is zoomed up so it fills the screen like on a phone.
+      className="relative isolate flex min-h-dvh flex-col overflow-clip bg-canvas font-sans text-black select-none [--owl:1] motion-reduce:**:animate-none! compact:[--owl:0.83] tiny:[--owl:0.6] tablet-wide:min-h-[calc(100dvh/1.15)] tablet-wide:[zoom:1.15] tablet:min-h-[calc(100dvh/1.3)] tablet:[zoom:1.3] tablet-lg:min-h-[calc(100dvh/1.45)] tablet-lg:[zoom:1.45]"
       // iOS only applies :active (the press feedback) when a touch listener is present.
       onTouchStart={() => {}}
     >
       <SkyBackground playing={introStarted} />
       <LightRays />
 
-      <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)] pb-[max(calc(var(--safe-bottom)-20px),14px)]">
+      <div className="relative mx-auto flex w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+1px)]">
         <motion.div
           variants={fadeIn}
           custom={STORY.subline}
@@ -99,8 +120,8 @@ export function Paywall({
 
         <header className="flex flex-col items-center gap-0.5">
           <OwlMascot onReady={() => setIntroStarted(true)} playing={introStarted} />
-          <div className="flex w-full flex-col items-center gap-[18px]">
-            <h1 className="-my-trim-display flex flex-col items-center text-center text-display font-medium">
+          <div className="flex w-full flex-col items-center gap-[18px] compact:gap-[14px] tiny:gap-[10px]">
+            <h1 className="-my-trim-display flex flex-col items-center text-center text-display font-medium tiny:-my-[6px] tiny:text-[24px] tiny:leading-[29px] narrow:-my-[6px] narrow:text-[24px] narrow:leading-[29px]">
               <motion.span variants={focusIn} custom={STORY.headline} className="whitespace-nowrap">
                 Dispute letters that
               </motion.span>
@@ -133,13 +154,13 @@ export function Paywall({
           variants={cardIn}
           custom={STORY.trial}
           aria-labelledby="trial-heading"
-          className="mt-2.5 flex flex-col gap-1 rounded-card bg-white p-1 shadow-card"
+          className="mt-2.5 flex flex-col gap-1 rounded-card bg-white p-1 shadow-card compact:mt-2 tiny:mt-1.5"
         >
           <motion.h2
             variants={itemIn}
             custom={STORY.trialItems - STORY.step}
             id="trial-heading"
-            className="flex justify-center py-2"
+            className="flex justify-center py-2 tiny:py-1"
           >
             <GoldText className="-my-trim-label text-label font-medium">HOW YOUR FREE TRIAL WORKS</GoldText>
           </motion.h2>
@@ -158,58 +179,62 @@ export function Paywall({
         </motion.section>
 
         {/* Absorbs extra height so the purchase block stays anchored to the bottom. */}
-        <div className="min-h-[17px] flex-1" />
+        <div className="min-h-[17px] flex-1 compact:min-h-3 tiny:min-h-2" />
 
-        <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
-          {PLAN_ORDER.map((id, index) => {
-            const option = PLANS[id]
-            return (
-              <PlanCard
-                key={id}
-                name="paywall-plan"
-                value={id}
-                label={option.label}
-                trial={option.trial}
-                price={option.price}
-                priceNote={option.priceNote}
-                badge={option.badge}
-                selected={id === selectedPlan}
-                onSelect={() => setSelectedPlan(id)}
-                sparkle={id === 'annual' && introSettled}
-                enterAt={STORY.plans + index * STORY.step}
-                badgeAt={STORY.saveBadge}
-              />
-            )
-          })}
-        </div>
-
-        <motion.div variants={cardIn} custom={STORY.cta} className="mt-2">
-          <PrimaryButton
-            title="Start My FREE 3-Day Trial"
-            details={['No charge today', plan.ctaPrice]}
-            onClick={() => onSubscribe(plan)}
-            shine={introSettled}
-          />
-        </motion.div>
-
-        <motion.footer
-          variants={fadeIn}
-          custom={STORY.footer}
-          className="mt-3 flex flex-col items-center gap-3 text-caption text-muted"
+        <div
+          className={`sticky bottom-0 z-20 -mx-gutter bg-canvas px-gutter pb-[max(calc(var(--safe-bottom)-20px),14px)] before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-linear-to-t before:from-canvas before:to-canvas/0 before:transition-opacity ${overflowing ? 'before:opacity-100' : 'before:opacity-0'}`}
         >
-          <p className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
-            <span>Cancel anytime</span>
-            <FooterDot />
-            <span>Auto-renews until canceled</span>
-          </p>
-          <nav className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
-            <FooterLink onClick={onOpenTerms}>Terms of use</FooterLink>
-            <FooterDot />
-            <FooterLink onClick={onOpenPrivacy}>Privacy Policy</FooterLink>
-            <FooterDot />
-            <FooterLink onClick={onRestore}>Restore</FooterLink>
-          </nav>
-        </motion.footer>
+          <div role="radiogroup" aria-label="Choose a plan" className="flex gap-2">
+            {PLAN_ORDER.map((id, index) => {
+              const option = PLANS[id]
+              return (
+                <PlanCard
+                  key={id}
+                  name="paywall-plan"
+                  value={id}
+                  label={option.label}
+                  trial={option.trial}
+                  price={option.price}
+                  priceNote={option.priceNote}
+                  badge={option.badge}
+                  selected={id === selectedPlan}
+                  onSelect={() => setSelectedPlan(id)}
+                  sparkle={id === 'annual' && introSettled}
+                  enterAt={STORY.plans + index * STORY.step}
+                  badgeAt={STORY.saveBadge}
+                />
+              )
+            })}
+          </div>
+
+          <motion.div variants={cardIn} custom={STORY.cta} className="mt-2 tiny:mt-1.5">
+            <PrimaryButton
+              title="Start My FREE 3-Day Trial"
+              details={['No charge today', plan.ctaPrice]}
+              onClick={() => onSubscribe(plan)}
+              shine={introSettled}
+            />
+          </motion.div>
+
+          <motion.footer
+            variants={fadeIn}
+            custom={STORY.footer}
+            className="mt-3 flex flex-col items-center gap-3 text-caption text-muted tiny:mt-2 tiny:gap-2"
+          >
+            <p className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
+              <span>Cancel anytime</span>
+              <FooterDot />
+              <span>Auto-renews until canceled</span>
+            </p>
+            <nav className="-my-trim-caption flex items-center gap-2 whitespace-nowrap">
+              <FooterLink onClick={onOpenTerms}>Terms of use</FooterLink>
+              <FooterDot />
+              <FooterLink onClick={onOpenPrivacy}>Privacy Policy</FooterLink>
+              <FooterDot />
+              <FooterLink onClick={onRestore}>Restore</FooterLink>
+            </nav>
+          </motion.footer>
+        </div>
       </div>
     </motion.div>
   )
