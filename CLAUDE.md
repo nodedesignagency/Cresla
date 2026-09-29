@@ -19,13 +19,25 @@ All work lives on `main`, and nothing else. The user asked for this so nothing g
 
 ## Project
 
-Single-screen animated paywall for a client's iOS app (credit dispute letters), headed for the App
-Store. React 19 + TypeScript + Vite 8 + Tailwind v4 + Framer Motion, wrapped with Capacitor 8
-(`com.cresla.app`, iOS 16.4+, iPhone and iPad). README.md has the file layout, asset list, screen
-size tiers and motion notes; read the relevant section rather than re-exploring.
+Animated screens for a client's iOS app (credit dispute letters), headed for the App Store:
+a paywall and a Home (chat) screen so far. React 19 + TypeScript + Vite 8 + Tailwind v4 + Framer
+Motion, wrapped with Capacitor 8 (`com.cresla.app`, iOS 16.4+, iPhone and iPad). README.md has the
+file layout, how to open each screen, asset list, screen size tiers and motion notes; read the
+relevant section rather than re-exploring.
 
-- Screen: `src/paywall/Paywall.tsx`. Intro timings: `STORY` in `src/paywall/motion.ts`.
-  Tokens and CSS loop animations: `tailwind.config.ts`.
+- Figma file `E7N7ZtobRh5wfepPAKR7vh`: paywall node `1:385`, Home node `13:52`. The Figma MCP is
+  on the Starter plan and hits its call limit quickly: make one `get_design_context` call per
+  node, download its assets straight away, and fall back to images the user attaches.
+- `src/App.tsx` is a dev harness: Home by default, `?screen=paywall` or `VITE_SCREEN=paywall`
+  for the paywall, `?connected=1` / `VITE_CONNECTED=1` for Home's returning state; holding the
+  Home logo 0.6s toggles the state.
+- Paywall: `src/paywall/Paywall.tsx`, intro timings `STORY` in `src/paywall/motion.ts`.
+- Home: `src/home/Home.tsx`, timings in `src/home/motion.ts`. It reuses the paywall's
+  `PrimaryButton`, `ui.ts` and motion variants.
+- Tokens and CSS loop animations for both: `tailwind.config.ts`. Only logo blues
+  (`#2882FA`→`#0C32AB`, brand `#3576FF`) and neutrals; nothing else coloured.
+- Tailwind here uses the JS config via `@config`, which does not emit `--color-*` CSS variables.
+  Use utilities (`text-brand`) or `currentColor`, never `var(--color-…)`.
 - Mascot: `owl.png` still during the drop-in, then `owl-loop.webp` (animated WebP with
   transparency, made by `scripts/make-owl-loop.mjs`) swapped in when it lands
   (`components/OwlMascot.tsx`).
@@ -58,17 +70,26 @@ size tiers and motion notes; read the relevant section rather than re-exploring.
 
 ## Current state
 
-- Done: paywall built from Figma, full intro and ambient motion, animated owl (now an animated
-  WebP, no video), responsive layout for every iPhone and iPad, HD icons.
+- Done: paywall (built from Figma, full motion, animated owl as an animated WebP, responsive,
+  HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states,
+  connect animation, all interactions (session 2, part 2).
 - Waiting on the user:
   - Set the GitHub default branch to `main` (repo Settings → General → Default branch), then
     delete the old `claude/charming-hawking-ilb5hy` branch.
-  - Confirm on the Simulator that the intro no longer freezes (a new screen recording is the
-    best check), then try the wired iPhone, and an older iPhone or Low Power Mode, before launch.
+  - Check Home on the Simulator and the iPhone, including the keyboard: typing in the composer
+    has only been tested in a desktop browser.
+- Next, per the user: animate Home's sleeping owl and lock bubble (replace `GaugeMascot.tsx`).
+- Open questions: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
+  icon) looked like a leftover duplicate and was left out; the returning state drops the subtitle.
 - Not built yet: real purchases (StoreKit), Sign In, Restore, Terms and Privacy links. The
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
+
+- **2, part 2** (2026-09-29): the user confirmed the paywall is smooth. Built the Home screen
+  from Figma node 13:52 (hit the Figma MCP limit after downloading everything; used the user's
+  image for detail). Verified in headless Chromium: all regions line up with the Figma render
+  within 1px at 393×852, all interactions work, iPhone SE to iPad layouts, Reduce Motion.
 
 - **2** (2026-09-27 to 29): Created `main` and this file. The user's Simulator recording showed
   the page freezing for about 1s exactly when the owl video started playing (1.45s into the

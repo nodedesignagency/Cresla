@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
-// Design tokens for the Cresla paywall (Figma: "Cresla Paywall Final", node 1:385).
+// Design tokens for the Cresla app (Figma: "Cresla Paywall Final", node 1:385, and the Home
+// screen, node 13:52).
 // Loaded by Tailwind v4 through `@config` in src/index.css.
 
 const gloss = (rgb: string, edge: string) =>
@@ -15,6 +16,10 @@ const gloss = (rgb: string, edge: string) =>
 
 const glossBrand = gloss('147,203,255', '#93cbff')
 
+/** A soft brand-blue glow: alpha stops every 80px from the centre, fading out by 800px. */
+const homeGlow = (at: string, alphas: number[]) =>
+  `radial-gradient(circle 800px at ${at}, ${alphas.map((a, i) => `rgba(40,130,250,${a}) ${i * 80}px`).join(', ')}, rgba(40,130,250,0) 800px)`
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
@@ -26,9 +31,16 @@ export default {
         brand: {
           DEFAULT: '#3576ff',
           deep: '#253ea7',
+          // Home: the rings around the logo, and the soft background glows.
+          ring: '#1971f4',
+          glow: '#2882fa',
         },
         success: '#0fb000',
         track: '#e2e4e9',
+        // Home: selected Chat/Support pill, round composer buttons, composer placeholder.
+        pill: '#eaeef6',
+        hairline: '#e3e2e5',
+        hint: 'rgba(77,85,100,0.75)',
       },
 
       fontFamily: {
@@ -41,6 +53,10 @@ export default {
       fontSize: {
         display: ['28px', { lineHeight: '34px', letterSpacing: '-0.02em' }],
         cta: ['18px', { lineHeight: '22px', letterSpacing: '-0.01em' }],
+        'cta-md': ['16px', { lineHeight: '19px', letterSpacing: '-0.01em' }],
+        // Home composer text and suggestion chips (Figma: 14.18px and 13px at 1.5).
+        prompt: ['14.18px', { lineHeight: '17px' }],
+        chip: ['13px', { lineHeight: '19.5px' }],
         title: ['16px', { lineHeight: '19px', letterSpacing: '-0.02em' }],
         label: ['14px', { lineHeight: '17px', letterSpacing: '-0.02em' }],
         button: ['14px', { lineHeight: '17px' }],
@@ -86,6 +102,25 @@ export default {
           'inset 0 -2px 2px 0 rgba(149,255,147,0.35)',
         ].join(', '),
         cta: `0 0 16px 0 rgba(192,220,241,0.2), ${glossBrand}`,
+        composer: [
+          '0 40.725px 11.978px 0 rgba(0,0,0,0)',
+          '0 26.352px 10.78px 0 rgba(0,0,0,0.01)',
+          '0 14.374px 8.385px 0 rgba(0,0,0,0.02)',
+          '0 5.989px 5.989px 0 rgba(0,0,0,0.04)',
+          '0 1.198px 3.593px 0 rgba(0,0,0,0.04)',
+        ].join(', '),
+        // Blue round voice button in the composer.
+        voice: [
+          '0 8px 8px -3px rgba(7,1,19,0.03)',
+          '0 5px 5px -2.5px rgba(7,1,19,0.03)',
+          '0 3px 3px -1.5px rgba(7,1,19,0.03)',
+          '0 2px 2px -1px rgba(7,1,19,0.03)',
+          '0 1px 1px -0.5px rgba(7,1,19,0.03)',
+          '0 0.5px 0.5px 0 rgba(7,1,19,0.03)',
+          'inset 0 1px 2px -0.5px rgba(255,255,255,0.12)',
+          'inset 0 0.5px 0.5px 0 rgba(255,255,255,0.16)',
+          'inset 0 8px 24px -4px rgba(255,255,255,0.16)',
+        ].join(', '),
         radio: '0 2px 2px 0 rgba(27,28,29,0.12)',
         'radio-active': 'inset 0 2px 2px 0 rgba(22,38,100,0.32)',
         'radio-dot': '0 2px 2px 0 rgba(27,28,29,0.12), inset 0 -2px 3px 0 #cfd1d3',
@@ -126,6 +161,16 @@ export default {
         // "Free for 3 days." gradient with a glint layer on top that passes over it once.
         'headline-glint':
           'linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0) 60%), linear-gradient(90deg, #287cf9 0%, #0f39b3 100%)',
+        // Home background: Figma's two brand-glow circles (30% opacity, 242px blur), as gradients
+        // with the same falloff (computed from the blur), so iOS never has to render the blur.
+        'home-glow': [
+          homeGlow('calc(100% - 31px) 76px', [0.048, 0.0457, 0.0393, 0.0306, 0.0216, 0.0137, 0.0079, 0.0041, 0.0019, 0.0008]),
+          homeGlow('39.5px calc(100% + 13.5px)', [0.0424, 0.0403, 0.0346, 0.0269, 0.0188, 0.0119, 0.0068, 0.0035, 0.0016, 0.0007]),
+        ].join(', '),
+        // Bloom behind the Home logo as it appears.
+        'logo-glow': 'radial-gradient(closest-side, rgba(40,130,250,0.4) 0%, rgba(40,130,250,0.14) 55%, rgba(40,130,250,0) 100%)',
+        // Score gauge segment once lit (the deepest segment's gradient, along the segment).
+        'gauge-fill': 'linear-gradient(21deg, #4187ff 0%, #0050d8 100%)',
       },
 
       // Ambient loops run as CSS animations so iOS composites them off the main thread;
@@ -192,6 +237,24 @@ export default {
           '100%': { transform: 'scale(1)' },
         },
         'row-lit': { from: { opacity: '0.4' }, to: { opacity: '1' } },
+        // Home: the logo's glow blooms as it appears, then fades away.
+        'logo-glow': {
+          '0%': { opacity: '0', transform: 'scale(0.5)' },
+          '35%': { opacity: '1', transform: 'scale(1)' },
+          '100%': { opacity: '0', transform: 'scale(1.35)' },
+        },
+        // Home gauge, while locked: each segment brightens in turn, so light runs across the arc.
+        'gauge-shimmer': {
+          '0%': { opacity: '0' },
+          '14%': { opacity: '0.55' },
+          '34%, 100%': { opacity: '0' },
+        },
+        // Home gauge, on connect: each segment lights up with a small pop.
+        'gauge-fill': {
+          '0%': { opacity: '0', transform: 'scale(0.92)' },
+          '60%': { opacity: '1', transform: 'scale(1.06)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
 
       animation: {
@@ -214,6 +277,9 @@ export default {
         'rail-glint': 'rail-glint 1.1s cubic-bezier(0.45, 0, 0.3, 1) both',
         'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
         'row-lit': 'row-lit 0.5s ease-out both',
+        'logo-glow': 'logo-glow 1.8s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'gauge-shimmer': 'gauge-shimmer 3.6s ease-in-out infinite',
+        'gauge-fill': 'gauge-fill 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },

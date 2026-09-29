@@ -1,7 +1,8 @@
 # Cresla
 
-Animated paywall screen built from the Figma design
-[Cresla Paywall Final](https://www.figma.com/design/E7N7ZtobRh5wfepPAKR7vh/Untitled?node-id=1-385).
+Animated iOS screens built from the Figma designs: the
+[paywall](https://www.figma.com/design/E7N7ZtobRh5wfepPAKR7vh/Untitled?node-id=1-385) and the
+[Home (chat) screen](https://www.figma.com/design/E7N7ZtobRh5wfepPAKR7vh/Untitled?node-id=13-52).
 
 React 19 + TypeScript + Vite · Tailwind CSS v4 · Framer Motion · Capacitor 8 (iOS)
 
@@ -28,6 +29,19 @@ cd ~/Cresla && git fetch origin && git stash && git checkout main && git pull &&
 
 `git stash` sets aside files the last build touched (such as `package-lock.json`), so they can't block
 the update. They're kept, not deleted, and `run.sh` regenerates them anyway.
+
+### Which screen opens
+
+The app opens on the Home screen. To see something else:
+
+| | Browser (`npm run dev`) | Simulator |
+|---|---|---|
+| Paywall | add `?screen=paywall` to the URL | `VITE_SCREEN=paywall ./scripts/run.sh` |
+| Home, returning state | add `?connected=1` | `VITE_CONNECTED=1 ./scripts/run.sh` |
+
+On Home, **hold the logo for about half a second** to flip between the first-time and returning
+states (in the browser: press and hold with the mouse). Tapping **Connect credit report** also
+switches to the returning state.
 
 The sections below do the same steps by hand.
 
@@ -73,8 +87,20 @@ Run `npx cap sync ios` afterwards so the Xcode project points back at the bundle
 
 ```
 src/
-  App.tsx                 Dev harness: renders <Paywall> and logs its callbacks
-  assets/                 All images (swap files here; see below)
+  App.tsx                 Dev harness: picks the screen, logs callbacks, toggles Home's state
+  assets/                 All images (swap files here; see below); Home's are in assets/home/
+  home/                   Home (chat) screen
+    Home.tsx              The screen, its two states and the connect animation
+    motion.ts             Load-in storyboard and connect timings
+    useScrollFade.ts      Soft fade on scrolling edges (chips row, short screens)
+    components/
+      ModeToggle.tsx      Chat / Support with the sliding pill
+      HomeLogo.tsx        Logo, its rings and the load-in glow
+      ConnectCard.tsx     First-time card: gauge, owl, Connect button
+      ScoreGauge.tsx      Five-segment gauge: shimmer while locked, fills on connect
+      GaugeMascot.tsx     The owl + lock bubble (swap in the animated version here)
+      SuggestionChips.tsx Chips row (scrolls sideways when it doesn't fit)
+      Composer.tsx        Text field and the + / mic / voice buttons
   paywall/                Self-contained paywall, ready to copy into another app
     Paywall.tsx           The screen and its props
     plans.ts              Plan labels, prices and CTA copy
@@ -116,6 +142,37 @@ viewport meta tag.
 
 Safe areas come from `env(safe-area-inset-*)`. To override them, set
 `--paywall-safe-top` / `--paywall-safe-bottom` on a parent element.
+
+## Home screen
+
+```tsx
+import { Home } from './home'
+
+<Home
+  hasConnectedReport={connected} // false: first-time state with the Connect card; true: returning
+  onConnect={startConnectFlow}    // Connect credit report tapped
+  onSignIn={openSignIn}
+  onMenu={openMenu}
+  onModeChange={(mode) => {}}     // 'chat' | 'support'
+  onAttach={...} onDictate={...} onVoice={...} // composer's + / mic / voice buttons
+/>
+```
+
+- **Two states, one component.** When `hasConnectedReport` turns on while the card is showing, the
+  gauge fills segment by segment, the card and subtitle sink away, and the logo and headline glide
+  to the centre. Turning it off brings the card back. The subtitle ("Let's start with your credit
+  report") only shows with the card.
+- **Suggestion chips** fill the composer with their text and focus it. They're listed in
+  `SUGGESTIONS` in `Home.tsx`. The row scrolls sideways under a soft fade when it doesn't fit.
+- **Mascot:** `components/GaugeMascot.tsx` is the only place that knows about the owl image. To
+  animate it, change what that component renders and keep its 73×73pt frame.
+- **Colours** are the logo blues (`#2882FA` to `#0C32AB`, plus `brand` `#3576FF`) and neutrals.
+- **Motion** follows the paywall: load-in with Framer Motion variants (logo glow, then the headline,
+  card, chips and composer rising in turn), loops as CSS animations (gauge shimmer), the connect
+  sequence as transform/opacity animations. Timings are in `src/home/motion.ts`. With Reduce Motion
+  on, everything appears in place and the states switch instantly.
+- **Short screens:** spacing tightens on the `tiny:` tier (iPhone SE). If it still doesn't fit
+  (Display Zoom on an SE), the middle scrolls with a soft fade, and the chips and composer stay put.
 
 ## Swapping assets
 
