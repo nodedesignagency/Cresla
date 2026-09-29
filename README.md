@@ -85,7 +85,7 @@ src/
       TrialTimeline.tsx   "How your free trial works" with the progress fill
       PerkItem.tsx        Icon + label perk, and the divider between perks
       PrimaryButton.tsx   CTA with shine sweep and press scale
-      OwlMascot.tsx       Mascot image with drop-in and float
+      OwlMascot.tsx       Mascot: still image for the drop-in, then the animated loop
       SkyBackground.tsx   Sky gradient and drifting clouds
       LightRays.tsx       Pulsing light beams
       GlossBadge.tsx, Radio.tsx, Sparkles.tsx
@@ -123,8 +123,8 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 
 | File | Used for | Current file | Notes |
 |---|---|---|---|
-| `owl-loop.mp4` | Mascot animation (5s seamless loop) | Generated with Magnific (Seedance 2.5) from `owl.png` on green, keyed with `scripts/make-alpha-video.mjs` | "Stacked alpha" video: colour on top, transparency mask below, 720×1440. See [Mascot video](#mascot-video) |
-| `owl.png` | Mascot still: shown during the drop-in, while the video loads, and when video can't play or Reduce Motion is on | Owl from Figma, 697×724 | Must be the video's first frame, at the same size and position, so the swap is invisible |
+| `owl-loop.webp` | Mascot animation (5s seamless loop) | Generated with Magnific (Seedance 2.5) from `owl.png` on green, keyed with `scripts/make-owl-loop.mjs` | Animated WebP with transparency, 456×456 (cropped to the owl), 24fps. See [Mascot animation](#mascot-animation) |
+| `owl.png` | Mascot still: shown during the drop-in, and when Reduce Motion is on or the loop can't load | Owl from Figma, 697×724 | Must be the loop's first frame, at the same size and position, so the swap is invisible |
 | `cloud-1.png` | Back cloud layer | From Figma, 2048×1138 | Shown at 889×494pt |
 | `cloud-2.png` | Front cloud layer | From Figma (same image) | Shown at 889×494pt |
 | `cloud-3.png` | Far, faint cloud layer (adds depth) | Same image | Shown at 600×333pt, 45% opacity |
@@ -157,31 +157,30 @@ and the content above scrolls under them, so the button is always visible.
 
 The app needs iOS 16.4 or newer (Tailwind CSS v4 relies on it), which covers iPhone 8/X and later.
 
-## Mascot video
+## Mascot animation
 
-The owl is `src/assets/owl-loop.mp4`, played by `components/AlphaVideo.tsx`. iPhones can't show
-transparent video in a web view (only Apple's HEVC-with-alpha, which Chrome can't play), so the
-file is a plain H.264 MP4 with the colour in the top half and the transparency mask in the bottom
-half. A small WebGL canvas combines them into a transparent owl, using hardware video decoding on
-every device.
+The owl's loop is `src/assets/owl-loop.webp`, an animated WebP with transparency, shown by
+`components/OwlMascot.tsx`. During the drop-in the owl is the still `owl.png`; when it lands, the
+loop is swapped in over it, starting on the same first frame.
 
-Starting a video for the first time can stall the page for a moment while iOS sets up playback
-(up to about a second in the Simulator). So before the intro begins, `AlphaVideo` warms the video
-up: it plays one frame, then rewinds to the first. The intro waits for that, for up to 1.2s.
+It's deliberately an image, not a video. Every time a `<video>` starts or resumes in an iOS web
+view, the system media player takes over briefly and can freeze the whole page (about a second in
+the Simulator, right in the middle of the intro). An animated image never involves it.
 
 To make a new loop:
 
 1. Put the still owl on a pure green (#00FF00) square, centred at about 60% of the width.
 2. Generate a 5s silent 1:1 video with that image as both the start and end frame, a locked
    static camera, and a prompt that keeps the background flat green.
-3. Key it and encode it (needs ffmpeg: `brew install ffmpeg`):
+3. Key it, crop it to the owl and encode it (needs ffmpeg: `brew install ffmpeg`):
 
    ```bash
-   node scripts/make-alpha-video.mjs path/to/green-screen.mov src/assets/owl-loop.mp4
+   node scripts/make-owl-loop.mjs path/to/green-screen.mov src/assets/owl-loop.webp
    ```
 
-4. If the owl's framing changed, update the canvas size and position in `components/OwlMascot.tsx`
-   so the video's first frame sits exactly over `owl.png`.
+4. The script prints the loop's position (`top-…`, `left-…`, `size-…`). Copy those into the loop's
+   `<img>` in `components/OwlMascot.tsx`, so its first frame sits exactly over `owl.png`. (The
+   numbers assume the owl is framed as in step 1.)
 
 ## Motion
 

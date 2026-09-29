@@ -26,16 +26,21 @@ size tiers and motion notes; read the relevant section rather than re-exploring.
 
 - Screen: `src/paywall/Paywall.tsx`. Intro timings: `STORY` in `src/paywall/motion.ts`.
   Tokens and CSS loop animations: `tailwind.config.ts`.
-- Mascot: stacked-alpha H.264 video drawn by WebGL (`components/AlphaVideo.tsx`), `owl.png`
-  as its first frame and fallback.
+- Mascot: `owl.png` still during the drop-in, then `owl-loop.webp` (animated WebP with
+  transparency, made by `scripts/make-owl-loop.mjs`) swapped in when it lands
+  (`components/OwlMascot.tsx`).
 - Check changes with `npm run build` (runs tsc + vite). There is no test suite.
 
 ## Rules
 
 - Animate only whole `transform` / `opacity` / `filter` values in Framer; loops are CSS keyframes
   in `tailwind.config.ts`. Everything must respect Reduce Motion.
-- Never start heavy work (video playback, big image decodes) in the middle of the intro. It
-  stalls the page on slower devices and in the Simulator (see session 2).
+- No `<video>` in the paywall. Every time a video starts or resumes in an iOS web view the
+  system media player takes over and can freeze the page for about a second (proven in the
+  Simulator, session 2). Use animated images instead.
+- Don't preload the owl loop: Chrome starts an animated image's clock on decode, so the loop
+  would no longer begin on its first frame (the one matching `owl.png`).
+- Never start heavy work in the middle of the intro.
 
 ## Cloud container tips
 
@@ -43,30 +48,35 @@ size tiers and motion notes; read the relevant section rather than re-exploring.
   and use headless Chromium for functional checks and screenshots. Playwright is installed
   globally, so load it with `createRequire('<output of npm root -g>/')('playwright')`, and serve
   the build with `npx vite preview` first.
-- Playwright's Chromium can't play H.264. For tests, transcode `owl-loop.mp4` to VP9 WebM and
-  serve it with `page.route('**/owl-loop-*.mp4', ...)`. Don't commit the WebM.
 - ffmpeg: `pip3 install imageio-ffmpeg`, then use the binary at
-  `python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` (no drawtext).
-  For screen recordings the user uploads, per-frame differences plus `tile` contact sheets
-  show freezes and jumps well.
+  `python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` (it has
+  libwebp_anim; no drawtext). `pip3 install pillow numpy` reads animated WebP frames.
+- Screen recordings the user uploads: per-frame differences plus `tile` contact sheets show
+  freezes (runs of ~0 difference) and jumps (one huge difference) well. Always ask the user
+  for a recording before guessing at a Simulator problem.
+- The user is not a developer: give exact commands to paste and click-by-click steps.
 
 ## Current state
 
-- Done: paywall built from Figma, full intro and ambient motion, animated owl, responsive layout
-  for every iPhone and iPad, HD icons, owl video warm-up (session 2).
+- Done: paywall built from Figma, full intro and ambient motion, animated owl (now an animated
+  WebP, no video), responsive layout for every iPhone and iPad, HD icons.
 - Waiting on the user:
   - Set the GitHub default branch to `main` (repo Settings → General → Default branch), then
     delete the old `claude/charming-hawking-ilb5hy` branch.
-  - Confirm on the Simulator that the intro no longer freezes, and try an older iPhone or
-    Low Power Mode before launch.
+  - Confirm on the Simulator that the intro no longer freezes (a new screen recording is the
+    best check), then try the wired iPhone, and an older iPhone or Low Power Mode, before launch.
 - Not built yet: real purchases (StoreKit), Sign In, Restore, Terms and Privacy links. The
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
 
-- **2** (2026-09-27): Created `main` and this file. The user's Simulator recording showed the web
-  view freezing for about 1.1s exactly when the owl video started playing (1.45s into the
-  intro), then everything jumping to its end state. A wired iPhone 18 Pro was fine. Fix: the video
-  is warmed up (one frame played, then rewound) before the intro, and the intro waits for it.
+- **2** (2026-09-27 to 29): Created `main` and this file. The user's Simulator recording showed
+  the page freezing for about 1s exactly when the owl video started playing (1.45s into the
+  intro), then everything jumping to its end state; a wired iPhone 18 Pro was fine. A first fix
+  (warm the video up before the intro) made it worse: a second recording showed a 1.7s blank
+  screen at launch and the same freeze, so every video start/resume freezes the Simulator.
+  Final fix: the owl loop is now an animated WebP (`owl-loop.webp`, 456px, 2.9 MB), with no
+  video and no WebGL; `AlphaVideo.tsx` and `owl-loop.mp4` were removed and
+  `make-alpha-video.mjs` became `make-owl-loop.mjs`.
 - **1** (2026-09-25 to 27, branch `claude/charming-hawking-ilb5hy`): project setup, paywall from
   Figma, motion, `scripts/run.sh`, animated owl, responsive layout, HD icons.

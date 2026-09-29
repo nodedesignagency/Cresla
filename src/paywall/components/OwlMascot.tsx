@@ -1,18 +1,17 @@
-// The mascot is a looping video with transparency (src/assets/owl-loop.mp4, "stacked alpha":
-// colour on top, mask below). src/assets/owl.png is its first frame: it's shown while the video
-// loads, during the drop-in, and whenever video can't play or Reduce Motion is on.
+// The mascot loop is an animated WebP with transparency (src/assets/owl-loop.webp). Its first frame
+// is src/assets/owl.png, which is shown during the drop-in and whenever Reduce Motion is on.
+//
+// It's an image rather than a <video> on purpose: every time a video starts or resumes in an iOS
+// web view, the system media player takes over briefly and can freeze the page (about a second
+// in the Simulator, right in the middle of the intro). An animated image never touches it.
 import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import owlLoop from '../../assets/owl-loop.mp4'
+import owlLoop from '../../assets/owl-loop.webp'
 import owl from '../../assets/owl.png'
 import { haloIn, owlDrop, STORY } from '../motion'
-import { AlphaVideo } from './AlphaVideo'
 
 interface OwlMascotProps {
-  /**
-   * Fires once the still image has loaded and the video has warmed up (or either has failed), so
-   * the intro never starts on a blank mascot and the video's start-up never lands mid-animation.
-   */
+  /** Fires when the still image is ready (or failed), so the intro never starts on a blank mascot. */
   onReady?: () => void
   /** The intro is running; the loop starts once the owl has landed. */
   playing: boolean
@@ -20,24 +19,16 @@ interface OwlMascotProps {
 
 export function OwlMascot({ onReady, playing }: OwlMascotProps) {
   const reduceMotion = useReducedMotion()
-  const [stillReady, setStillReady] = useState(false)
-  const [videoReady, setVideoReady] = useState(false)
-  const [videoFailed, setVideoFailed] = useState(false)
   const [looping, setLooping] = useState(false)
+  const [loopShown, setLoopShown] = useState(false)
 
+  // The loop is only loaded when it's needed (not preloaded): a browser may start an animated
+  // image's clock as soon as it's decoded, and the loop must begin on its first frame.
   useEffect(() => {
     if (!playing) return
     const timer = setTimeout(() => setLooping(true), (STORY.owlLands + 0.15) * 1000)
     return () => clearTimeout(timer)
   }, [playing])
-
-  const useVideo = !reduceMotion && !videoFailed
-  const showVideo = useVideo && videoReady
-
-  const ready = stillReady && (showVideo || !useVideo)
-  useEffect(() => {
-    if (ready) onReady?.()
-  }, [ready, onReady])
 
   return (
     // Sized by --owl (1 normally; smaller on short screens, set on the Paywall root).
@@ -56,19 +47,20 @@ export function OwlMascot({ onReady, playing }: OwlMascotProps) {
           src={owl}
           alt=""
           draggable={false}
-          onLoad={() => setStillReady(true)}
-          onError={() => setStillReady(true)}
-          className={`size-full object-contain select-none ${showVideo ? 'invisible' : ''}`}
+          onLoad={onReady}
+          onError={onReady}
+          className={`size-full object-contain select-none ${loopShown ? 'invisible' : ''}`}
         />
-        {useVideo && (
-          // The video frame is 1:1 with the owl centred at ~60% of its width; this places its first
-          // frame exactly over owl.png (224.8px frame, owl centre at 77.4px, 78.7px in the box).
-          <AlphaVideo
+        {looping && !reduceMotion && (
+          // The loop starts on its first frame, which matches owl.png, and sits exactly over it
+          // (a 456px crop of the 720px animation frame, at 0.3123pt per pixel). The still is hidden
+          // only once the loop has loaded, so there's never a gap; if it fails, the still stays.
+          <img
             src={owlLoop}
-            playing={looping}
-            onReady={() => setVideoReady(true)}
-            onError={() => setVideoFailed(true)}
-            className={`pointer-events-none absolute top-[calc(-33.71px*var(--owl,1))] left-[calc(-34.97px*var(--owl,1))] size-[calc(224.82px*var(--owl,1))] max-w-none ${showVideo ? '' : 'invisible'}`}
+            alt=""
+            draggable={false}
+            onLoad={() => setLoopShown(true)}
+            className="pointer-events-none absolute top-[calc(7.51px*var(--owl,1))] left-[calc(7.5px*var(--owl,1))] size-[calc(142.39px*var(--owl,1))] max-w-none select-none"
           />
         )}
       </motion.div>
