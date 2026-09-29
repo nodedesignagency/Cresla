@@ -23,8 +23,11 @@ The first Simulator build takes a few minutes; later runs are much faster.
 To pull the latest changes and run them:
 
 ```bash
-cd ~/Cresla && git fetch origin && git checkout main && git pull && ./scripts/run.sh
+cd ~/Cresla && git fetch origin && git stash && git checkout main && git pull && ./scripts/run.sh
 ```
+
+`git stash` sets aside files the last build touched (such as `package-lock.json`), so they can't block
+the update. They're kept, not deleted, and `run.sh` regenerates them anyway.
 
 The sections below do the same steps by hand.
 

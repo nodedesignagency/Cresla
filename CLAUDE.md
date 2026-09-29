@@ -12,8 +12,10 @@ All work lives on `main`, and nothing else. The user asked for this so nothing g
   unless the user asks. The user has authorised pushing straight to `main`.
 - Start of session: `git fetch origin main && git checkout -B main origin/main`
 - End of session: commit, then `git push -u origin main`
-- On their Mac the user runs: `cd ~/Cresla && git checkout main && git pull && ./scripts/run.sh`
-  (iOS Simulator), or runs on a wired iPhone from Xcode.
+- On their Mac the user runs
+  `cd ~/Cresla && git fetch origin && git stash && git checkout main && git pull && ./scripts/run.sh`
+  (iOS Simulator), or runs on a wired iPhone from Xcode. No `git stash pop`: the stashed files
+  are build leftovers, and popping them onto newer code can leave conflict markers.
 
 ## Project
 
