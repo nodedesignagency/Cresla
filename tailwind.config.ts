@@ -54,8 +54,9 @@ export default {
         display: ['28px', { lineHeight: '34px', letterSpacing: '-0.02em' }],
         cta: ['18px', { lineHeight: '22px', letterSpacing: '-0.01em' }],
         'cta-md': ['16px', { lineHeight: '19px', letterSpacing: '-0.01em' }],
-        // Home composer text and suggestion chips (Figma: 14.18px and 13px at 1.5).
-        prompt: ['14.18px', { lineHeight: '17px' }],
+        // Home composer text: larger than Figma's 14.18px so it reads like a native chat field (and
+        // at 16px or more iOS never zooms in when it's focused). Suggestion chips: Figma's 13px at 1.5.
+        prompt: ['18px', { lineHeight: '24px', letterSpacing: '-0.01em' }],
         chip: ['13px', { lineHeight: '19.5px' }],
         title: ['16px', { lineHeight: '19px', letterSpacing: '-0.02em' }],
         label: ['14px', { lineHeight: '17px', letterSpacing: '-0.02em' }],

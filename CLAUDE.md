@@ -124,7 +124,11 @@ relevant section rather than re-exploring.
   "Checking all 3 bureaus…" state; the button already says Connecting…); heading is now "Connect
   your credit / report to unlock" (user's words; that exact break, per their reference image),
   closer to the gauge, 24px on `narrow:`. The user's iPhone showed only the paywall: Xcode was
-  installing a stale web build; added `./scripts/run.sh iphone`.
+  installing a stale web build; added `./scripts/run.sh iphone`. Composer looked small next to
+  Claude's app (measured both screenshots: same box height, but Claude's text ~40% bigger, 36pt
+  buttons): now 18px/24px text, 36pt buttons, 30/26pt concentric corners, same ~108pt height.
+  Fits a real iPhone SE (20pt status bar; the browser harness fakes 47pt, so test with
+  `--home-safe-top`/`--home-safe-bottom` set to the device's real insets).
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is

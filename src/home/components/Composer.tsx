@@ -5,8 +5,8 @@ import sendIcon from '../../assets/home/icon-send.svg'
 import voiceIcon from '../../assets/home/icon-voice.svg'
 import { focusRing, hitArea } from '../../paywall/ui'
 
-/** The field grows with its text up to this height (six lines), then scrolls. */
-const MAX_FIELD_HEIGHT = 102
+/** The field grows with its text up to this height (five lines), then scrolls. */
+const MAX_FIELD_HEIGHT = 120
 
 interface ComposerProps {
   value: string
@@ -35,10 +35,13 @@ export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoi
   }, [value, fieldRef])
 
   return (
-    <div className="rounded-card bg-white p-1 shadow-composer">
+    // Sized like a native chat field (Claude, Messages): 18pt text and 36pt buttons close to the
+    // edges. The corners follow the round buttons: the grey panel's radius is the buttons' (18) plus
+    // their 8pt inset, and the white frame adds its own 4pt.
+    <div className="rounded-[30px] bg-white p-1 shadow-composer">
       {/* Tapping anywhere in the grey area starts typing */}
       <div
-        className="flex cursor-text flex-col gap-5 rounded-panel bg-canvas px-[16.88px] py-[17.87px] tiny:gap-4 tiny:py-3.5"
+        className="flex cursor-text flex-col gap-4 rounded-[26px] bg-canvas px-2 pt-4 pb-2 tiny:gap-3 tiny:pt-3"
         onClick={(event) => {
           if (event.target === event.currentTarget) fieldRef.current?.focus()
         }}
@@ -50,42 +53,42 @@ export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoi
           onChange={(event) => onChange(event.target.value)}
           placeholder="Ask Cresla anything."
           aria-label="Ask Cresla anything"
-          className="block w-full resize-none bg-transparent text-prompt text-ink outline-none select-text placeholder:text-hint"
+          className="block w-full resize-none bg-transparent px-2 text-prompt text-ink outline-none select-text placeholder:text-hint"
         />
         <div className="flex items-end justify-between">
           <button
             type="button"
             aria-label="Add"
             onClick={onAttach}
-            className={`${hitArea} ${focusRing} ${press} flex size-7 cursor-pointer items-center justify-center rounded-full border border-hairline bg-white`}
+            className={`${hitArea} ${focusRing} ${press} flex size-9 cursor-pointer items-center justify-center rounded-full border border-hairline bg-white`}
           >
-            <img src={plusIcon} alt="" className="h-[12.54px] w-[12.54px] max-w-none" />
+            <img src={plusIcon} alt="" className="size-4 max-w-none" />
           </button>
-          <div className="flex items-center gap-[7.06px]">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               aria-label="Dictate"
               onClick={onDictate}
-              className={`${hitArea} ${focusRing} ${press} flex size-7 cursor-pointer items-center justify-center rounded-full border border-hairline bg-white`}
+              className={`${hitArea} ${focusRing} ${press} flex size-9 cursor-pointer items-center justify-center rounded-full border border-hairline bg-white`}
             >
-              <img src={micIcon} alt="" className="size-[15.864px] max-w-none" />
+              <img src={micIcon} alt="" className="size-5 max-w-none" />
             </button>
             {/* Voice mode while the field is empty; the send arrow once there's something to send */}
             <button
               type="button"
               aria-label={canSend ? 'Send' : 'Voice mode'}
               onClick={canSend ? onSend : onVoice}
-              className={`${hitArea} ${focusRing} ${press} flex size-7 cursor-pointer items-center justify-center rounded-full bg-brand shadow-voice`}
+              className={`${hitArea} ${focusRing} ${press} flex size-9 cursor-pointer items-center justify-center rounded-full bg-brand shadow-voice`}
             >
               <img
                 src={voiceIcon}
                 alt=""
-                className={`${swap} size-[15.864px] max-w-none ${canSend ? 'scale-50 -rotate-45 opacity-0' : ''}`}
+                className={`${swap} size-5 max-w-none ${canSend ? 'scale-50 -rotate-45 opacity-0' : ''}`}
               />
               <img
                 src={sendIcon}
                 alt=""
-                className={`${swap} size-[15.864px] max-w-none ${canSend ? '' : 'scale-50 rotate-45 opacity-0'}`}
+                className={`${swap} size-5 max-w-none ${canSend ? '' : 'scale-50 rotate-45 opacity-0'}`}
               />
             </button>
           </div>
