@@ -78,7 +78,7 @@ relevant section rather than re-exploring.
 
 - Done: paywall (built from Figma, full motion, animated owl as an animated WebP, responsive,
   HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states, all
-  interactions, app-launch logo intro, ripple pulse round the logo, returning body text, profile
+  interactions, app-launch logo intro, soft ripple pulse round the logo, returning body text, profile
   picture instead of Sign In once connected, send arrow in the composer. Demo connect flow (the
   Connect page shows the gauge 1.55x bigger, no card).
 - Waiting on the user:
@@ -96,6 +96,12 @@ relevant section rather than re-exploring.
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
+
+- **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
+  thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is
+  linear, 3.3s, 3 rings, no fill, 30% brand-ring hairline from the logo's own size. Connect page:
+  palest gauge segments were invisible on the page background, added a `tone="page"` with deeper
+  versions of segments 1 and 2.
 
 - **4** (2026-09-30): user feedback. Logo rings: no static rings any more, a smooth ripple pulse
   instead (also on the success badge; static rings only with Reduce Motion). Connect page: card

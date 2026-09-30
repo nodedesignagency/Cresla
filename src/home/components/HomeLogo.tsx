@@ -4,10 +4,11 @@ import logo from '../../assets/home/logo.png'
 import { delay } from '../../paywall/motion'
 import { glide, HOME_STORY } from '../motion'
 
-// The pulse: rings the size of the design's innermost ring leave the logo's edge, grow and fade
-// out, a third of a cycle apart, so the ripple is continuous (`ring-ripple` in tailwind.config.ts).
+// The pulse: faint rings in the logo's shape leave its edge and drift outwards at an even pace,
+// fading as they go. A third of a cycle apart, so three are always travelling, evenly spaced
+// (`ring-ripple` in tailwind.config.ts).
 const RIPPLES = 3
-const RIPPLE_CYCLE = 3.6
+const RIPPLE_CYCLE = 3.3
 
 // With Reduce Motion there's no pulse; the design's three faint static rings show instead (0.33pt
 // brand-blue lines at 20%, drawn as inset shadows because browsers round thinner borders up to 1pt).
@@ -102,7 +103,7 @@ export function HomeLogo({ playing, splash, rings, onReady, onLongPress }: HomeL
             Array.from({ length: RIPPLES }, (_, index) => (
               <span
                 key={index}
-                className="absolute size-[56.667px] animate-ring-ripple rounded-[14.167px] bg-brand-ring/4 text-brand-ring shadow-[inset_0_0_0_0.75px_currentColor]"
+                className="absolute size-[53.333px] animate-ring-ripple rounded-[25%] text-brand-ring/30 shadow-[inset_0_0_0_0.75px_currentColor]"
                 // They start as the logo lands, then keep a third of a cycle apart.
                 style={delay(HOME_STORY.glow + (index * RIPPLE_CYCLE) / RIPPLES)}
               />

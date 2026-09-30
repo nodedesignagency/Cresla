@@ -49,7 +49,7 @@ export function ConnectReport({ onBack, onConnected }: ConnectReportProps) {
       {/* The gauge, bigger than on Home: zoom re-renders it at the larger size, so it stays sharp */}
       <div className="flex flex-col items-center gap-4">
         <div className="[zoom:1.55] tiny:[zoom:1.3]">
-          <ScoreGauge shimmer={!connecting} filled={connecting}>
+          <ScoreGauge shimmer={!connecting} filled={connecting} tone="page">
             <GaugeMascot className="absolute top-[36.06px] left-[50.68px]" />
           </ScoreGauge>
         </div>

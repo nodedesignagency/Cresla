@@ -7,9 +7,9 @@ import { DemoNote, FlowScreen } from './FlowScreen'
 // Begins as the screen finishes sliding in.
 const AT = 0.3
 
-// The same pulse as around the Home logo: rings leave the badge's edge, grow and fade out.
+// The same pulse as around the Home logo: faint rings leave the badge's edge and drift outwards.
 const RIPPLES = 3
-const RIPPLE_CYCLE = 3.6
+const RIPPLE_CYCLE = 3.3
 
 /** Stand-in success screen after connecting: a check badge with a pulse around it, then Continue. */
 export function ConnectSuccess({ onContinue }: { onContinue: () => void }) {
@@ -27,7 +27,7 @@ export function ConnectSuccess({ onContinue }: { onContinue: () => void }) {
           {Array.from({ length: RIPPLES }, (_, index) => (
             <span
               key={index}
-              className="absolute size-24 animate-ring-ripple rounded-full bg-brand-ring/4 text-brand-ring shadow-[inset_0_0_0_0.75px_currentColor] motion-reduce:hidden"
+              className="absolute size-24 animate-ring-ripple rounded-full text-brand-ring/30 shadow-[inset_0_0_0_0.75px_currentColor] motion-reduce:hidden"
               style={delay(AT + 0.4 + (index * RIPPLE_CYCLE) / RIPPLES)}
             />
           ))}

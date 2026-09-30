@@ -243,12 +243,14 @@ export default {
           '35%': { opacity: '1', transform: 'scale(1)' },
           '100%': { opacity: '0', transform: 'scale(1.35)' },
         },
-        // Pulse around the Home logo and the success badge: a ring leaves the edge, grows and fades
-        // out. Three rings a third of a cycle apart make one continuous, even ripple.
+        // Pulse around the Home logo and the success badge: faint rings leave the edge and drift
+        // outwards at an even pace, fading as they go. One ring leaves every 1.1s, so three are
+        // always travelling, evenly spaced (see RIPPLES in HomeLogo / ConnectSuccess).
         'ring-ripple': {
           '0%': { opacity: '0', transform: 'scale(1)' },
-          '14%': { opacity: '0.7' },
-          '100%': { opacity: '0', transform: 'scale(1.8)' },
+          '12%': { opacity: '1' },
+          '55%': { opacity: '0.45' },
+          '100%': { opacity: '0', transform: 'scale(1.55)' },
         },
         // Home gauge, while locked: each segment brightens in turn, so light runs across the arc.
         'gauge-shimmer': {
@@ -285,7 +287,7 @@ export default {
         'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
         'row-lit': 'row-lit 0.5s ease-out both',
         'logo-glow': 'logo-glow 1.8s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'ring-ripple': 'ring-ripple 3.6s cubic-bezier(0.25, 0.55, 0.35, 1) infinite both',
+        'ring-ripple': 'ring-ripple 3.3s linear infinite both',
         'gauge-shimmer': 'gauge-shimmer 3.6s ease-in-out infinite',
         'gauge-fill': 'gauge-fill 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
       },

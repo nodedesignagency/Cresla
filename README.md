@@ -177,9 +177,12 @@ import { Home } from './home'
   the launch screen (`@capacitor/splash-screen`, see `src/launch.ts`), then shrinks the logo into
   place while the rest rises in. iOS caches launch screens: if the Simulator still shows the old
   plain one, delete the app from the Simulator (hold its icon → Remove App) and run again.
-- **Pulse around the logo:** rings leave the logo's edge, grow and fade, three a third of a cycle
-  apart (`ring-ripple` in `tailwind.config.ts`); the success badge uses the same pulse. With Reduce
-  Motion the design's three still rings show instead.
+- **Pulse around the logo:** faint thin rings in the logo's shape leave its edge and drift outwards
+  at an even pace, fading as they go; one leaves every 1.1s (`ring-ripple` in `tailwind.config.ts`).
+  The success badge uses the same pulse. With Reduce Motion the design's three still rings show.
+- **Gauge colours:** on Home's white card the segments use Figma's colours; straight on the page
+  background (the Connect page, `tone="page"`) the two palest segments are a few shades deeper
+  (`gauge-1-page.svg`, `gauge-2-page.svg`) so they stay visible.
 - **Top right:** Sign In before the report is connected; after, the profile picture
   (`assets/home/avatar.png`, 41pt, calls `onProfile`).
 - **Composer:** while there's text, the blue voice button shows a send arrow instead (`onSend`,
