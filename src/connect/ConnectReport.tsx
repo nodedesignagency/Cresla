@@ -61,9 +61,11 @@ export function ConnectReport({ onBack, onConnected }: ConnectReportProps) {
           <GaugeMascot playing={mascotPlaying} className="absolute top-[36.06px] left-[50.68px]" />
         </ScoreGauge>
       </div>
-      {/* "credit report" and "to unlock" never split across lines */}
+      {/* Two even lines on every screen */}
       <h1 className="mt-8 text-display font-medium text-ink tiny:mt-5 narrow:text-[24px] narrow:leading-[29px]">
-        Connect your credit&nbsp;report <span className="whitespace-nowrap">to unlock</span>
+        Connect your credit
+        <br />
+        report to unlock
       </h1>
       <p className="mt-3 max-w-[300px] text-label font-normal text-muted">
         We’ll securely pull your reports from all 3 bureaus and check every line for errors.
