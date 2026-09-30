@@ -66,6 +66,9 @@ relevant section rather than re-exploring.
   and use headless Chromium for functional checks and screenshots. Playwright is installed
   globally, so load it with `createRequire('<output of npm root -g>/')('playwright')`, and serve
   the build with `npx vite preview` first.
+- Stopping the preview server: never `pkill -f`/`pgrep -f` a pattern like "vite preview" in the
+  same command that mentions it; it matches your own shell and kills it (exit 144). Use
+  `ps -eo pid,comm,args | awk '$2=="node" && /vite/ {print $1}'` and `kill` that PID.
 - ffmpeg: `pip3 install imageio-ffmpeg`, then use the binary at
   `python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())"` (it has
   libwebp_anim; no drawtext). `pip3 install pillow numpy` reads animated WebP frames.
