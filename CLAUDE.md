@@ -114,6 +114,9 @@ relevant section rather than re-exploring.
   and the last frame repeats it, so the script now drops the last frame, crops to a rectangle and
   takes a `home` preset. Loop's first frame sits on the still within 0.1pt; no green fringe.
   Checked in headless Chromium: loads only after the intro, Reduce Motion stays still, no errors.
+  Then, per the user's screenshot: Connect page lost "Your reports are locked" (and its
+  "Checking all 3 bureaus…" state; the button already says Connecting…); heading is now "Connect
+  your credit report to unlock" (user's words), closer to the gauge, 24px on `narrow:`.
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is
