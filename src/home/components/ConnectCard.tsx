@@ -26,15 +26,22 @@ export function ConnectCard({ onConnect, shimmer, filling }: ConnectCardProps) {
 
       <div className="flex w-full flex-col items-center gap-2.5">
         <PrimaryButton title="Connect credit report" size="md" onClick={onConnect} disabled={filling} />
-        <p className="flex flex-wrap items-start justify-center gap-1 text-caption whitespace-nowrap text-muted">
-          <img src={shieldIcon} alt="" className="h-[8.02px] w-2 max-w-none" />
-          <span className="-my-trim-caption">Won’t affect your score</span>
-          <span aria-hidden className="flex h-[9px] w-2 items-center justify-center">
-            <span className="size-[3.5px] rounded-full bg-current" />
-          </span>
-          <span className="-my-trim-caption">About 2 minutes</span>
-        </p>
+        <Reassurance />
       </div>
     </div>
+  )
+}
+
+/** "Won't affect your score • About 2 minutes", under the Connect buttons. */
+export function Reassurance() {
+  return (
+    <p className="flex flex-wrap items-start justify-center gap-1 text-caption whitespace-nowrap text-muted">
+      <img src={shieldIcon} alt="" className="h-[8.02px] w-2 max-w-none" />
+      <span className="-my-trim-caption">Won’t affect your score</span>
+      <span aria-hidden className="flex h-[9px] w-2 items-center justify-center">
+        <span className="size-[3.5px] rounded-full bg-current" />
+      </span>
+      <span className="-my-trim-caption">About 2 minutes</span>
+    </p>
   )
 }

@@ -243,6 +243,12 @@ export default {
           '35%': { opacity: '1', transform: 'scale(1)' },
           '100%': { opacity: '0', transform: 'scale(1.35)' },
         },
+        // Home logo rings: each brightens and swells a little in turn (inner to outer), so a soft
+        // pulse radiates out from the logo. Also used around the success badge.
+        'ring-pulse': {
+          '0%, 60%, 100%': { opacity: '0.2', transform: 'scale(1)' },
+          '22%': { opacity: '0.65', transform: 'scale(1.045)' },
+        },
         // Home gauge, while locked: each segment brightens in turn, so light runs across the arc.
         'gauge-shimmer': {
           '0%': { opacity: '0' },
@@ -278,6 +284,7 @@ export default {
         'icon-pop': 'icon-pop 0.55s cubic-bezier(0.3, 0, 0.3, 1) both',
         'row-lit': 'row-lit 0.5s ease-out both',
         'logo-glow': 'logo-glow 1.8s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'ring-pulse': 'ring-pulse 2.8s ease-in-out infinite',
         'gauge-shimmer': 'gauge-shimmer 3.6s ease-in-out infinite',
         'gauge-fill': 'gauge-fill 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
       },

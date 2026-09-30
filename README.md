@@ -39,9 +39,10 @@ The app opens on the Home screen. To see something else:
 | Paywall | add `?screen=paywall` to the URL | `VITE_SCREEN=paywall ./scripts/run.sh` |
 | Home, returning state | add `?connected=1` | `VITE_CONNECTED=1 ./scripts/run.sh` |
 
-On Home, **hold the logo for about half a second** to flip between the first-time and returning
-states (in the browser: press and hold with the mouse). Tapping **Connect credit report** also
-switches to the returning state.
+Tapping **Connect credit report** on Home opens the connect flow: a demo Connect page, then a demo
+Success page, then back to Home in its returning state. To flip Home between its first-time and
+returning states directly, **hold the logo for about half a second** (in the browser: press and
+hold with the mouse).
 
 The sections below do the same steps by hand.
 
@@ -87,7 +88,10 @@ Run `npx cap sync ios` afterwards so the Xcode project points back at the bundle
 
 ```
 src/
-  App.tsx                 Dev harness: picks the screen, logs callbacks, toggles Home's state
+  App.tsx                 Picks the screen; Home ↔ connect flow navigation; logs callbacks
+  launch.ts               Hides the native launch screen; status bar text colour
+  navigation/Stack.tsx    iOS-style screen stack (slide in from the right, back slides out)
+  connect/                Demo connect flow: ConnectReport.tsx, ConnectSuccess.tsx, FlowScreen.tsx
   assets/                 All images (swap files here; see below); Home's are in assets/home/
   home/                   Home (chat) screen
     Home.tsx              The screen, its two states and the connect animation
@@ -158,18 +162,28 @@ import { Home } from './home'
 />
 ```
 
-- **Two states, one component.** When `hasConnectedReport` turns on while the card is showing, the
-  gauge fills segment by segment, the card and subtitle sink away, and the logo and headline glide
-  to the centre. Turning it off brings the card back. The subtitle ("Let's start with your credit
-  report") only shows with the card.
+- **Two states, one component.** First time: the Connect card, with "Let's start with your credit
+  report." Returning: just the logo, headline and "Ask about your report, disputes or next steps."
+  (both lines in `SUBTITLE` in `Home.tsx`).
+- **Connect flow.** Connect credit report calls `onConnect`; the app opens the Connect page (a
+  demo: the gauge fills while it "connects"), then the Success page, and Continue returns to Home.
+  The state turns on while Home is covered (`active={false}`), so Home is simply in its returning
+  state when it comes back. If the state changes while Home is showing (holding the logo), it
+  animates: the gauge fills, the card sinks away and the logo and headline glide to the centre.
+- **Opening like an app.** The native launch screen shows the logo at twice its size, centred
+  (`ios/App/App/Base.lproj/LaunchScreen.storyboard`). Home starts from exactly that picture, hides
+  the launch screen (`@capacitor/splash-screen`, see `src/launch.ts`), then shrinks the logo into
+  place while the rest rises in. iOS caches launch screens: if the Simulator still shows the old
+  plain one, delete the app from the Simulator (hold its icon → Remove App) and run again.
+- **Logo rings** pulse softly from the inner ring out, once the intro has settled.
 - **Suggestion chips** fill the composer with their text and focus it. They're listed in
   `SUGGESTIONS` in `Home.tsx`. The row scrolls sideways under a soft fade when it doesn't fit.
 - **Mascot:** `components/GaugeMascot.tsx` is the only place that knows about the owl image. To
   animate it, change what that component renders and keep its 73×73pt frame.
 - **Colours** are the logo blues (`#2882FA` to `#0C32AB`, plus `brand` `#3576FF`) and neutrals.
-- **Motion** follows the paywall: load-in with Framer Motion variants (logo glow, then the headline,
-  card, chips and composer rising in turn), loops as CSS animations (gauge shimmer), the connect
-  sequence as transform/opacity animations. Timings are in `src/home/motion.ts`. With Reduce Motion
+- **Motion** follows the paywall: load-in with Framer Motion variants (the logo shrinking into place
+  with its glow, then the headline, card, chips and composer rising in turn), loops as CSS
+  animations (gauge shimmer, ring pulse), the connect sequence as transform/opacity animations. Timings are in `src/home/motion.ts`. With Reduce Motion
   on, everything appears in place and the states switch instantly.
 - **Short screens:** spacing tightens on the `tiny:` tier (iPhone SE). If it still doesn't fit
   (Display Zoom on an SE), the middle scrolls with a soft fade, and the chips and composer stay put.

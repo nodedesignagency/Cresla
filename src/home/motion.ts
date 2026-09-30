@@ -3,21 +3,30 @@
 import type { Variants } from 'framer-motion'
 import { easeOut, easeOutExpo } from '../paywall/motion'
 
-/** Load-in storyboard, in seconds from the moment the logo image is ready. */
+/**
+ * Load-in storyboard, in seconds from the moment the logo image is ready. It opens like an app
+ * launch: the logo sits centred at twice its size (exactly where the native launch screen showed
+ * it), then shrinks into its place, and the rest of the screen rises in around it.
+ */
 export const HOME_STORY = {
-  /** Top bar: menu, Chat/Support and Sign In fade in. */
-  topBar: 0.15,
-  /** Logo fades in as its glow blooms; the rings around it follow `step` apart. */
-  logo: 0.05,
-  rings: 0.2,
-  headline: 0.3,
-  subtitle: 0.38,
-  card: 0.46,
+  /** How long the logo holds, big and centred, before it shrinks. */
+  splashHold: 0.3,
+  /** How long it takes to shrink and glide into place. */
+  splashShrink: 0.85,
+  /** The soft background glows fade in. */
+  backdrop: 0.2,
+  /** As the logo lands: its glow blooms, and the rings spread out `step` apart. */
+  glow: 0.85,
+  rings: 0.95,
+  topBar: 1.0,
+  headline: 1.0,
+  subtitle: 1.08,
+  card: 1.16,
   /** First suggestion chip; the rest follow `step` apart. */
-  chips: 0.6,
-  composer: 0.7,
-  /** Everything has landed; the gauge shimmer starts. */
-  settled: 1.5,
+  chips: 1.28,
+  composer: 1.38,
+  /** Everything has landed; the gauge shimmer and the ring pulse start. */
+  settled: 2.2,
   step: 0.06,
 } as const
 
@@ -36,26 +45,11 @@ export const CONNECT = {
 /** iOS-style ease for layout moves: fast start, long soft landing. */
 export const glide = 'cubic-bezier(0.22, 1, 0.36, 1)'
 
-/** The logo comes into focus and settles on a soft spring. */
-export const logoIn: Variants = {
-  hidden: { opacity: 0, filter: 'blur(8px)', transform: 'scale(0.86)' },
-  show: {
-    opacity: 1,
-    filter: 'blur(0px)',
-    transform: 'scale(1)',
-    transition: {
-      opacity: { duration: 0.6, ease: easeOut, delay: HOME_STORY.logo },
-      filter: { duration: 0.7, ease: easeOut, delay: HOME_STORY.logo },
-      transform: { type: 'spring', duration: 0.9, bounce: 0.3, delay: HOME_STORY.logo },
-    },
-  },
-}
-
 /** The faint rings around the logo spread out to their places. Pass the delay with `custom`. */
 export const ringIn: Variants = {
   hidden: { opacity: 0, transform: 'scale(0.82)' },
   show: (delay: number) => ({
-    opacity: 0.2,
+    opacity: 1,
     transform: 'scale(1)',
     transition: {
       opacity: { duration: 0.6, ease: easeOut, delay },

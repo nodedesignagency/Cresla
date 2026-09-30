@@ -12,9 +12,20 @@ const config: CapacitorConfig = {
   },
   plugins: {
     StatusBar: {
-      // White status bar text over the blue sky, drawn on top of the web view.
-      style: 'DARK',
+      // Dark status bar text for Home's light page, drawn on top of the web view. The paywall
+      // switches to white text over its blue sky (src/App.tsx).
+      style: 'LIGHT',
       overlaysWebView: true,
+    },
+    SplashScreen: {
+      // The launch screen (the logo at 2x, see LaunchScreen.storyboard) stays up until Home has
+      // drawn the same logo in the same place and hides it (src/launch.ts), so the handoff is
+      // seamless. After 3s it hides regardless.
+      launchAutoHide: true,
+      launchShowDuration: 3000,
+      launchFadeOutDuration: 150,
+      backgroundColor: '#f2f4f8',
+      showSpinner: false,
     },
   },
 }

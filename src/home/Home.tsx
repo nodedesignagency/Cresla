@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import helpIcon from '../assets/home/icon-help.svg'
 import menuIcon from '../assets/home/icon-menu.svg'
 import sparkleIcon from '../assets/home/icon-sparkle.svg'
+import { hideLaunchScreen } from '../launch'
 import { cardIn, fadeIn, itemIn } from '../paywall/motion'
 import { focusRing, hitArea } from '../paywall/ui'
 import { Composer } from './components/Composer'
@@ -18,6 +19,12 @@ export const SUGGESTIONS: Suggestion[] = [
   { label: 'How Can Cresla Help?', icon: sparkleIcon },
 ]
 
+/** Body text under "How can I help?": first time (with the Connect card), and once connected. */
+export const SUBTITLE = {
+  firstTime: "Let's start with your credit report.",
+  returning: 'Ask about your report, disputes or next steps.',
+}
+
 // Safe-area insets. A host can override them (e.g. to preview a notch in a desktop browser) by
 // setting --home-safe-top / --home-safe-bottom on an ancestor.
 const rootStyle = {
@@ -28,9 +35,12 @@ const rootStyle = {
 export interface HomeProps {
   /**
    * false: first-time state, with the Connect credit report card. true: returning state, just the
-   * logo and headline. Turning it on while the card is showing plays the connect animation.
+   * logo, headline and body text. Turning it on while Home is showing plays the connect animation;
+   * while another screen covers Home (see `active`) it switches instantly.
    */
   hasConnectedReport: boolean
+  /** Home is the screen on top. When covered, its loops pause and state changes don't animate. */
+  active?: boolean
   /** Connect credit report was tapped. */
   onConnect: () => void
   onSignIn?: () => void
@@ -46,6 +56,7 @@ export interface HomeProps {
 
 export function Home({
   hasConnectedReport,
+  active = true,
   onConnect,
   onSignIn,
   onMenu,
@@ -62,7 +73,10 @@ export function Home({
   const mainRef = useRef<HTMLElement>(null)
   const mainFade = useScrollFade(mainRef, 'y', { start: 20, end: 32 })
 
-  // The load-in starts once the logo image is ready (so it never pops in), or after 0.6s regardless.
+  // The load-in starts once the logo image and the font are ready (so nothing pops in or shifts),
+  // or after 0.6s regardless. At that moment the logo is drawn big and centred, just like the
+  // native launch screen, so that can be hidden without a visible change.
+  const [logoReady, setLogoReady] = useState(false)
   const [introStarted, setIntroStarted] = useState(false)
   const [introSettled, setIntroSettled] = useState(false)
   useEffect(() => {
@@ -70,13 +84,19 @@ export function Home({
     return () => clearTimeout(fallback)
   }, [])
   useEffect(() => {
+    if (logoReady) document.fonts.ready.then(() => setIntroStarted(true))
+  }, [logoReady])
+  useEffect(() => {
+    if (introStarted) hideLaunchScreen()
+  }, [introStarted])
+  useEffect(() => {
     if (!introStarted) return
     const timer = setTimeout(() => setIntroSettled(true), HOME_STORY.settled * 1000)
     return () => clearTimeout(timer)
   }, [introStarted])
 
-  // First-time ↔ returning. The card (and the subtitle, which only makes sense with it) stays
-  // mounted through the connect animation, then leaves the layout.
+  // First-time ↔ returning. The card stays mounted through the connect animation, then leaves the
+  // layout; the body text changes with it.
   const [cardMounted, setCardMounted] = useState(!hasConnectedReport)
   const [filling, setFilling] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
@@ -86,23 +106,35 @@ export function Home({
   const entering = useRef(false)
   const connecting = useRef(false)
 
-  /** Adds or removes the card, remembering where the logo and headline were so they can glide. */
-  const relayout = (mounted: boolean) => {
-    flipFrom.current = heroRef.current?.getBoundingClientRect().top ?? null
+  /**
+   * Adds or removes the card. When animated, remembers where the logo and headline were so they
+   * can glide to their new place.
+   */
+  const relayout = (mounted: boolean, animate: boolean) => {
+    flipFrom.current = animate ? (heroRef.current?.getBoundingClientRect().top ?? null) : null
     entering.current = mounted
     setCardMounted(mounted)
+  }
+  const stopConnecting = () => {
+    connecting.current = false
+    setFilling(false)
+    for (const element of [cardRef.current, subtitleRef.current]) {
+      element?.getAnimations().forEach((animation) => animation.cancel())
+    }
   }
 
   useEffect(() => {
     const timers: number[] = []
     const after = (seconds: number, run: () => void) => timers.push(window.setTimeout(run, seconds * 1000))
+    const animate = active && !reduceMotion
 
     if (hasConnectedReport && cardMounted) {
-      if (reduceMotion) {
-        relayout(false)
+      if (!animate) {
+        stopConnecting()
+        relayout(false, false)
         return
       }
-      // Connected: light the gauge segment by segment, then the card and subtitle sink away.
+      // Connected: light the gauge segment by segment, then the card and body text sink away.
       connecting.current = true
       setFilling(true)
       after(CONNECT.fill, () => {
@@ -118,29 +150,26 @@ export function Home({
         after(CONNECT.leave, () => {
           connecting.current = false
           setFilling(false)
-          relayout(false)
+          relayout(false, true)
         })
       })
     } else if (!hasConnectedReport && cardMounted && connecting.current) {
       // Switched back in the middle of the connect animation: undo it.
-      connecting.current = false
-      setFilling(false)
-      for (const element of [cardRef.current, subtitleRef.current]) {
-        element?.getAnimations().forEach((animation) => animation.cancel())
-      }
+      stopConnecting()
     } else if (!hasConnectedReport && !cardMounted) {
-      relayout(true)
+      relayout(true, animate)
     }
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [hasConnectedReport, cardMounted, reduceMotion])
+  }, [hasConnectedReport, cardMounted, reduceMotion, active])
 
-  // After the card is added or removed, the logo and headline re-centre. They glide from where they
-  // were (a transform animation, so it runs on the compositor), and a returning card rises in.
+  // After an animated change, the logo and headline re-centre: they glide from where they were
+  // (a transform animation, so it runs on the compositor). The new body text fades in, and a
+  // returning card rises in.
   useLayoutEffect(() => {
     const from = flipFrom.current
     flipFrom.current = null
     const hero = heroRef.current
-    if (from === null || !hero || reduceMotion) return
+    if (from === null || !hero) return
     const offset = from - hero.getBoundingClientRect().top
     if (Math.abs(offset) > 0.5) {
       hero.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0)' }], {
@@ -148,18 +177,24 @@ export function Home({
         easing: glide,
       })
     }
+    // Replace the text's fade-out (it held at 0) with the fade-in, before anything is painted.
+    subtitleRef.current?.getAnimations().forEach((animation) => animation.cancel())
+    subtitleRef.current?.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 450,
+      delay: 200,
+      easing: 'ease-out',
+      fill: 'backwards',
+    })
     if (entering.current) {
-      for (const element of [subtitleRef.current, cardRef.current]) {
-        element?.animate(
-          [
-            { opacity: 0, transform: 'translateY(16px) scale(0.97)' },
-            { opacity: 1, transform: 'none' },
-          ],
-          { duration: 500, delay: 150, easing: glide, fill: 'backwards' },
-        )
-      }
+      cardRef.current?.animate(
+        [
+          { opacity: 0, transform: 'translateY(16px) scale(0.97)' },
+          { opacity: 1, transform: 'none' },
+        ],
+        { duration: 500, delay: 150, easing: glide, fill: 'backwards' },
+      )
     }
-  }, [cardMounted, reduceMotion])
+  }, [cardMounted])
 
   const pickSuggestion = (suggestion: Suggestion) => {
     setDraft(suggestion.label)
@@ -180,10 +215,17 @@ export function Home({
       animate={introStarted || reduceMotion ? 'show' : 'hidden'}
       // Screen-size tiers (see src/index.css): tighter spacing on short phones, and on tall iPads
       // the whole layout is zoomed up so it fills the screen like on a phone.
-      className="relative isolate flex h-dvh flex-col overflow-clip bg-canvas bg-home-glow font-sans text-ink select-none motion-reduce:**:animate-none! tablet-wide:h-[calc(100dvh/1.15)] tablet-wide:[zoom:1.15] tablet:h-[calc(100dvh/1.3)] tablet:[zoom:1.3] tablet-lg:h-[calc(100dvh/1.45)] tablet-lg:[zoom:1.45]"
+      className={`relative isolate flex h-dvh flex-col overflow-clip bg-canvas font-sans text-ink select-none motion-reduce:**:animate-none! ${active ? '' : '**:[animation-play-state:paused]'} tablet-wide:h-[calc(100dvh/1.15)] tablet-wide:[zoom:1.15] tablet:h-[calc(100dvh/1.3)] tablet:[zoom:1.3] tablet-lg:h-[calc(100dvh/1.45)] tablet-lg:[zoom:1.45]`}
       // iOS only applies :active (the press feedback) when a touch listener is present.
       onTouchStart={() => {}}
     >
+      {/* Soft brand-blue glows in two corners, fading in once the logo has taken over */}
+      <motion.div
+        aria-hidden
+        variants={fadeIn}
+        custom={HOME_STORY.backdrop}
+        className="pointer-events-none absolute inset-0 bg-home-glow"
+      />
       <div className="relative mx-auto flex min-h-0 w-full max-w-[430px] flex-1 flex-col px-gutter pt-[calc(var(--safe-top)+21px)] pb-[max(calc(var(--safe-bottom)-14px),20px)]">
         <motion.header
           variants={fadeIn}
@@ -229,7 +271,9 @@ export function Home({
             <div ref={heroRef} className="flex flex-col items-center gap-4 tiny:gap-3">
               <HomeLogo
                 playing={introStarted && !reduceMotion}
-                onReady={() => setIntroStarted(true)}
+                splash={!reduceMotion}
+                pulse={introSettled && active && !reduceMotion}
+                onReady={() => setLogoReady(true)}
                 onLongPress={onLogoLongPress}
               />
               <div className="flex w-full flex-col items-center gap-5 text-center tiny:gap-3.5">
@@ -240,18 +284,15 @@ export function Home({
                 >
                   How can I help?
                 </motion.h1>
-                {cardMounted && (
-                  <div ref={subtitleRef}>
-                    <motion.p
-                      variants={itemIn}
-                      custom={HOME_STORY.subtitle}
-                      initial={lateInitial}
-                      className="-my-trim-label text-label font-normal text-ink"
-                    >
-                      Let's start with your credit report.
-                    </motion.p>
-                  </div>
-                )}
+                <div ref={subtitleRef}>
+                  <motion.p
+                    variants={itemIn}
+                    custom={HOME_STORY.subtitle}
+                    className="-my-trim-label text-label font-normal text-ink"
+                  >
+                    {cardMounted ? SUBTITLE.firstTime : SUBTITLE.returning}
+                  </motion.p>
+                </div>
               </div>
             </div>
             {cardMounted && (

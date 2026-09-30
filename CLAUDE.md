@@ -28,9 +28,15 @@ relevant section rather than re-exploring.
 - Figma file `E7N7ZtobRh5wfepPAKR7vh`: paywall node `1:385`, Home node `13:52`. The Figma MCP is
   on the Starter plan and hits its call limit quickly: make one `get_design_context` call per
   node, download its assets straight away, and fall back to images the user attaches.
-- `src/App.tsx` is a dev harness: Home by default, `?screen=paywall` or `VITE_SCREEN=paywall`
-  for the paywall, `?connected=1` / `VITE_CONNECTED=1` for Home's returning state; holding the
-  Home logo 0.6s toggles the state.
+- `src/App.tsx`: Home by default, `?screen=paywall` or `VITE_SCREEN=paywall` for the paywall,
+  `?connected=1` / `VITE_CONNECTED=1` for Home's returning state; holding the Home logo 0.6s
+  toggles the state. Home → Connect (demo) → Success (demo) → Home runs on a small iOS-style
+  stack (`src/navigation/Stack.tsx`); the demo pages are in `src/connect/`.
+- Launch: the native launch screen is the logo at 2x (106.67pt), centred
+  (`LaunchScreen.storyboard`, `LaunchLogo` image set). `@capacitor/splash-screen` holds it until
+  Home has drawn the same logo in the same place (`src/launch.ts`), then Home shrinks it into place.
+- Status bar text is set per screen (`setStatusBarText` in `src/launch.ts`): dark on Home and the
+  connect flow, light on the paywall.
 - Paywall: `src/paywall/Paywall.tsx`, intro timings `STORY` in `src/paywall/motion.ts`.
 - Home: `src/home/Home.tsx`, timings in `src/home/motion.ts`. It reuses the paywall's
   `PrimaryButton`, `ui.ts` and motion variants.
@@ -71,20 +77,29 @@ relevant section rather than re-exploring.
 ## Current state
 
 - Done: paywall (built from Figma, full motion, animated owl as an animated WebP, responsive,
-  HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states,
-  connect animation, all interactions (session 2, part 2).
+  HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states, all
+  interactions, app-launch logo intro, pulsing rings, returning body text. Demo connect flow.
 - Waiting on the user:
   - Set the GitHub default branch to `main` (repo Settings → General → Default branch), then
     delete the old `claude/charming-hawking-ilb5hy` branch.
-  - Check Home on the Simulator and the iPhone, including the keyboard: typing in the composer
-    has only been tested in a desktop browser.
+  - Check Home on the Simulator and the iPhone, including the keyboard (the composer has only
+    been tested in a desktop browser) and the launch handoff (storyboard and splash plugin were
+    written without Xcode; if the build complains about LaunchScreen.storyboard, look there first).
+  - Approve the placeholder copy: returning body text "Ask about your report, disputes or next
+    steps.", and the demo Connect / Success page texts.
 - Next, per the user: animate Home's sleeping owl and lock bubble (replace `GaugeMascot.tsx`).
-- Open questions: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
-  icon) looked like a leftover duplicate and was left out; the returning state drops the subtitle.
+- Open question: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
+  icon) looked like a leftover duplicate and was left out.
 - Not built yet: real purchases (StoreKit), Sign In, Restore, Terms and Privacy links. The
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
+
+- **3** (2026-09-30): user feedback on Home. Logo now opens like an app (native launch screen with
+  the logo at 2x, Home takes over and shrinks it into place; exact centring checked on iPhones
+  and iPads); logo rings pulse; Connect now opens a demo Connect page → Success page → Home in the
+  returning state, with iOS slide transitions; returning state has body text. Fixed the status bar
+  text (was white on Home's light page).
 
 - **2, part 2** (2026-09-29): the user confirmed the paywall is smooth. Built the Home screen
   from Figma node 13:52 (hit the Figma MCP limit after downloading everything; used the user's
