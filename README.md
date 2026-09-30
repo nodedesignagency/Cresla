@@ -193,7 +193,8 @@ import { Home } from './home'
   (`assets/home/avatar.png`, 41pt, calls `onProfile`).
 - **Composer:** while there's text, the blue voice button shows a send arrow instead (`onSend`,
   then the field clears). It's sized like a native chat field (18pt text, 36pt buttons, rounder
-  corners), larger than the Figma design's 14pt text and 28pt buttons, at the user's request.
+  corners, 120pt tall), larger than the Figma design's 14pt text and 28pt buttons, at the user's
+  request. The chips above use a shorter shadow (`shadow-chip`) that fits in the 10pt gap.
 - **Suggestion chips** fill the composer with their text and focus it. They're listed in
   `SUGGESTIONS` in `Home.tsx`. The row scrolls sideways under a soft fade when it doesn't fit.
 - **Sleeping owl:** `components/GaugeMascot.tsx`, a 73×73pt frame inside the gauge (on Home's card and,

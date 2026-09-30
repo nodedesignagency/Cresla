@@ -93,6 +93,9 @@ export default {
           '0 5.989px 2.994px 0 rgba(0,0,0,0.04)',
           '0 1.198px 1.797px 0 rgba(0,0,0,0.04)',
         ].join(', '),
+        // Suggestion chips: the card shadow's two closest layers. It fades out within 9px, so it fits
+        // the chips' scrolling row (which clips) and never runs under the composer 10px below.
+        chip: ['0 5.989px 2.994px 0 rgba(0,0,0,0.04)', '0 1.198px 1.797px 0 rgba(0,0,0,0.04)'].join(', '),
         'gloss-brand': glossBrand,
         'gloss-success': [
           'inset 0 1px 4px 0 #93ffaa',

@@ -128,7 +128,9 @@ relevant section rather than re-exploring.
   Claude's app (measured both screenshots: same box height, but Claude's text ~40% bigger, 36pt
   buttons): now 18px/24px text, 36pt buttons, 30/26pt concentric corners, same ~108pt height.
   Fits a real iPhone SE (20pt status bar; the browser harness fakes 47pt, so test with
-  `--home-safe-top`/`--home-safe-bottom` set to the device's real insets).
+  `--home-safe-top`/`--home-safe-bottom` set to the device's real insets). Then +12pt taller
+  (120pt; 22px top padding and gap; SE +8, 7pt spare). Chips' shadow was cut (scrolling row clips,
+  composer 10pt below covers it): chips now use `shadow-chip`, the card shadow's two closest layers.
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is

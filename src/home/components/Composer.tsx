@@ -41,7 +41,7 @@ export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoi
     <div className="rounded-[30px] bg-white p-1 shadow-composer">
       {/* Tapping anywhere in the grey area starts typing */}
       <div
-        className="flex cursor-text flex-col gap-4 rounded-[26px] bg-canvas px-2 pt-4 pb-2 tiny:gap-3 tiny:pt-3"
+        className="flex cursor-text flex-col gap-[22px] rounded-[26px] bg-canvas px-2 pt-[22px] pb-2 tiny:gap-4 tiny:pt-4"
         onClick={(event) => {
           if (event.target === event.currentTarget) fieldRef.current?.focus()
         }}

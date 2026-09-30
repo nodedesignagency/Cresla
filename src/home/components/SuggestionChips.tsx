@@ -39,7 +39,7 @@ export function SuggestionChips({ items, onPick, enterAt, step }: SuggestionChip
           <button
             type="button"
             onClick={() => onPick(item)}
-            className={`${hitArea} ${focusRing} flex cursor-pointer items-center gap-[4.33px] rounded-[54px] bg-white px-3 py-[6.17px] text-chip whitespace-nowrap text-ink shadow-card transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.96]`}
+            className={`${hitArea} ${focusRing} flex cursor-pointer items-center gap-[4.33px] rounded-[54px] bg-white px-3 py-[6.17px] text-chip whitespace-nowrap text-ink shadow-chip transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.96]`}
           >
             <img src={item.icon} alt="" className="size-3.5 max-w-none" />
             {item.label}
