@@ -106,6 +106,10 @@ relevant section rather than re-exploring.
   - Approve the placeholder copy: returning body text "Ask about your report, disputes or next
     steps.", and the demo Connect / Success page texts.
   - Check the sleeping owl on the Simulator and the iPhone.
+- Delivery (client approved, session 6): the GitHub repo is PUBLIC and its default branch is still
+  the old `claude/charming-hawking-ilb5hy`, so "Download ZIP" from the repo page gives the old
+  paywall-only code. The app icon is still Capacitor's placeholder (blue X). CLAUDE.md is internal.
+  A fresh clone of `main` installs, builds and `cap copy`s cleanly.
 - Idea offered to the user, not built: the lock in the bubble could pop open when the report connects.
 - Open question: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
   icon) looked like a leftover duplicate and was left out.
