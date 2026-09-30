@@ -14,8 +14,14 @@ All work lives on `main`, and nothing else. The user asked for this so nothing g
 - End of session: commit, then `git push -u origin main`
 - On their Mac the user runs
   `cd ~/Cresla && git fetch origin && git stash && git checkout main && git pull && ./scripts/run.sh`
-  (iOS Simulator), or runs on a wired iPhone from Xcode. No `git stash pop`: the stashed files
-  are build leftovers, and popping them onto newer code can leave conflict markers.
+  (iOS Simulator), or the same ending in `./scripts/run.sh iphone` for their wired iPhone (builds,
+  syncs, opens Xcode; they press Run). No `git stash pop`: the stashed files are build leftovers,
+  and popping them onto newer code can leave conflict markers.
+- Xcode only packages what `npx cap sync ios` last copied (`ios/App/App/public`, not in git).
+  Pressing Run without syncing shows an old build: that's why the iPhone once showed only the
+  paywall (session 6). Signing: `DEVELOPMENT_TEAM` isn't in the project, so the team the user picks
+  in Xcode is a local change that `git stash` sets aside on every update; if that bites, ask for
+  their Team ID and commit it.
 
 ## Project
 
@@ -117,7 +123,8 @@ relevant section rather than re-exploring.
   Then, per the user's screenshot: Connect page lost "Your reports are locked" (and its
   "Checking all 3 bureaus…" state; the button already says Connecting…); heading is now "Connect
   your credit / report to unlock" (user's words; that exact break, per their reference image),
-  closer to the gauge, 24px on `narrow:`.
+  closer to the gauge, 24px on `narrow:`. The user's iPhone showed only the paywall: Xcode was
+  installing a stale web build; added `./scripts/run.sh iphone`.
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is

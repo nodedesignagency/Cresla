@@ -4,6 +4,7 @@
 #
 #   ./scripts/run.sh                  iPhone simulator (the one already open, or the newest iPhone Pro)
 #   ./scripts/run.sh "iPhone 16"      a specific simulator by name
+#   ./scripts/run.sh iphone           your own iPhone: builds and syncs, then opens Xcode to press Run
 #   ./scripts/run.sh web              browser preview at http://localhost:5173 instead
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -25,11 +26,19 @@ command -v xcrun >/dev/null || fail "The iOS Simulator needs macOS with Xcode. U
 xcrun xcodebuild -version >/dev/null 2>&1 ||
   fail "Xcode command line tools aren't pointing at Xcode. Run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
 
-step "Building web app"
+step "Building web app (opens on: ${VITE_SCREEN:-home})"
 npm run build
 
+# Xcode doesn't build the web app: it packages whatever this step last copied into the iOS project.
 step "Syncing into the iOS project"
 npx cap sync ios
+
+if [[ "${1:-}" == "iphone" ]]; then
+  step "Opening Xcode"
+  npx cap open ios
+  printf '\n\033[1;32m✓ Up to date.\033[0m In Xcode, pick your iPhone at the top, then press ▶ (Run).\n'
+  exit 0
+fi
 
 step "Choosing a simulator"
 udid=$(xcrun simctl list devices available --json | node -e '

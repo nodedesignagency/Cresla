@@ -15,8 +15,14 @@ Requires Node 22.12 or newer, and Xcode for the Simulator.
 ```bash
 ./scripts/run.sh                 # install, build, sync, then build and launch in the iOS Simulator
 ./scripts/run.sh "iPhone 16"     # same, on a specific simulator
+./scripts/run.sh iphone          # your own iPhone: install, build, sync, then open Xcode
 ./scripts/run.sh web             # browser preview instead
 ```
+
+**On your iPhone:** Xcode doesn't build the screens itself; it packages whatever the last
+`npx cap sync ios` copied into the iOS project. So always run `./scripts/run.sh iphone` first, then in
+Xcode pick your iPhone at the top and press ▶ (Run). Pressing Run on its own installs the last
+build, which may be an old one or a paywall-only one (`VITE_SCREEN=paywall`).
 
 Without a name it uses the simulator that's already open, or the newest iPhone Pro.
 The first Simulator build takes a few minutes; later runs are much faster.
