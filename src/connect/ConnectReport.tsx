@@ -9,6 +9,9 @@ import { DemoNote, FlowScreen } from './FlowScreen'
 /** How long the demo "connection" takes: every gauge segment lights up, then a short hold. */
 const DEMO_CONNECT_SECONDS = 4 * CONNECT.segmentStep + 0.5 + 0.4
 
+/** The owl starts moving once the page has slid in (0.5s, see navigation/Stack.tsx). */
+const MASCOT_AT = 0.55
+
 interface ConnectReportProps {
   onBack: () => void
   /** The (demo) connection has finished. */
@@ -23,6 +26,12 @@ export function ConnectReport({ onBack, onConnected }: ConnectReportProps) {
   const [connecting, setConnecting] = useState(false)
   const done = useRef(onConnected)
   done.current = onConnected
+
+  const [mascotPlaying, setMascotPlaying] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setMascotPlaying(true), MASCOT_AT * 1000)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     if (!connecting) return
@@ -50,7 +59,7 @@ export function ConnectReport({ onBack, onConnected }: ConnectReportProps) {
       <div className="flex flex-col items-center gap-4">
         <div className="[zoom:1.55] tiny:[zoom:1.3]">
           <ScoreGauge shimmer={!connecting} filled={connecting} tone="page">
-            <GaugeMascot className="absolute top-[36.06px] left-[50.68px]" />
+            <GaugeMascot playing={mascotPlaying} className="absolute top-[36.06px] left-[50.68px]" />
           </ScoreGauge>
         </div>
         <p className="text-label font-normal text-muted" aria-live="polite">

@@ -47,6 +47,12 @@ relevant section rather than re-exploring.
 - Mascot: `owl.png` still during the drop-in, then `owl-loop.webp` (animated WebP with
   transparency, made by `scripts/make-owl-loop.mjs`) swapped in when it lands
   (`components/OwlMascot.tsx`).
+- Home's sleeping owl (`home/components/GaugeMascot.tsx`, 73×73pt, on the card and the Connect
+  page): still `home/owl-sleeping.png` (owl only), then `home/owl-sleeping-loop.webp` once the
+  screen has settled (`playing`). The thought bubble and its two dots are separate PNGs floating in
+  CSS (`thought-float`). Made with `make-owl-loop.mjs ... home` from a Magnific Seedance 2.5 video
+  (5s, 1:1, 1080p, no audio, start = end frame, 3,950 credits); the green start frame is the owl at
+  2.4x centred in 1080px (README, Mascot animation).
 - Check changes with `npm run build` (runs tsc + vite). There is no test suite.
 
 ## Rules
@@ -83,7 +89,8 @@ relevant section rather than re-exploring.
   HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states, all
   interactions, app-launch logo intro, soft ripple pulse round the logo, returning body text, profile
   picture instead of Sign In once connected, send arrow in the composer. Demo connect flow (the
-  Connect page shows the gauge 1.55x bigger, no card).
+  Connect page shows the gauge 1.55x bigger, no card). Home's sleeping owl is animated (breathes and
+  snuggles into its wing, 5s loop; the lock bubble floats in code).
 - Waiting on the user:
   - Set the GitHub default branch to `main` (repo Settings → General → Default branch), then
     delete the old `claude/charming-hawking-ilb5hy` branch.
@@ -92,13 +99,21 @@ relevant section rather than re-exploring.
     written without Xcode; if the build complains about LaunchScreen.storyboard, look there first).
   - Approve the placeholder copy: returning body text "Ask about your report, disputes or next
     steps.", and the demo Connect / Success page texts.
-- Next, per the user: animate Home's sleeping owl and lock bubble (replace `GaugeMascot.tsx`).
+  - Check the sleeping owl on the Simulator and the iPhone.
+- Idea offered to the user, not built: the lock in the bubble could pop open when the report connects.
 - Open question: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
   icon) looked like a leftover duplicate and was left out.
 - Not built yet: real purchases (StoreKit), Sign In, Restore, Terms and Privacy links. The
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
+
+- **6** (2026-09-30): animated Home's sleeping owl. Asked the user first (they chose: breathe +
+  snuggle, bubble animated in code, no Zzz, gentle). Split owl-sleeping.png into owl / bubble / two
+  dots (separate shapes in the PNG). One Seedance 2.5 generation; its frame 0 is the upload itself
+  and the last frame repeats it, so the script now drops the last frame, crops to a rectangle and
+  takes a `home` preset. Loop's first frame sits on the still within 0.1pt; no green fringe.
+  Checked in headless Chromium: loads only after the intro, Reduce Motion stays still, no errors.
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is

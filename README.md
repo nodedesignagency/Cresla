@@ -102,7 +102,7 @@ src/
       HomeLogo.tsx        Logo, its rings and the load-in glow
       ConnectCard.tsx     First-time card: gauge, owl, Connect button
       ScoreGauge.tsx      Five-segment gauge: shimmer while locked, fills on connect
-      GaugeMascot.tsx     The owl + lock bubble (swap in the animated version here)
+      GaugeMascot.tsx     The sleeping owl (animated loop) and its floating lock bubble
       SuggestionChips.tsx Chips row (scrolls sideways when it doesn't fit)
       Composer.tsx        Text field and the + / mic / voice buttons
   paywall/                Self-contained paywall, ready to copy into another app
@@ -189,12 +189,16 @@ import { Home } from './home'
   then the field clears).
 - **Suggestion chips** fill the composer with their text and focus it. They're listed in
   `SUGGESTIONS` in `Home.tsx`. The row scrolls sideways under a soft fade when it doesn't fit.
-- **Mascot:** `components/GaugeMascot.tsx` is the only place that knows about the owl image. To
-  animate it, change what that component renders and keep its 73×73pt frame.
+- **Sleeping owl:** `components/GaugeMascot.tsx`, a 73×73pt frame inside the gauge (on Home's card and,
+  bigger, on the Connect page). Once the screen has settled, the owl breathes and snuggles into its
+  wing in a 5s loop (`home/owl-sleeping-loop.webp`, see [Mascot animation](#mascot-animation)),
+  swapped in over the still `home/owl-sleeping.png`. The thought bubble and its two dots are separate
+  images that bob gently in code, one after another (`thought-float` in `tailwind.config.ts`), so
+  the lock stays sharp and can react later (for example, opening on connect).
 - **Colours** are the logo blues (`#2882FA` to `#0C32AB`, plus `brand` `#3576FF`) and neutrals.
 - **Motion** follows the paywall: load-in with Framer Motion variants (the logo shrinking into place
   with its glow, then the headline, card, chips and composer rising in turn), loops as CSS
-  animations (gauge shimmer, ring pulse), the connect sequence as transform/opacity animations. Timings are in `src/home/motion.ts`. With Reduce Motion
+  animations (gauge shimmer, ring pulse, thought bubble), the connect sequence as transform/opacity animations. Timings are in `src/home/motion.ts`. With Reduce Motion
   on, everything appears in place and the states switch instantly.
 - **Short screens:** spacing tightens on the `tiny:` tier (iPhone SE). If it still doesn't fit
   (Display Zoom on an SE), the middle scrolls with a soft fade, and the chips and composer stay put.
@@ -207,6 +211,9 @@ Replace a file in `src/assets/` with one of the same name. Nothing else needs to
 |---|---|---|---|
 | `owl-loop.webp` | Mascot animation (5s seamless loop) | Generated with Magnific (Seedance 2.5) from `owl.png` on green, keyed with `scripts/make-owl-loop.mjs` | Animated WebP with transparency, 456×456 (cropped to the owl), 24fps. See [Mascot animation](#mascot-animation) |
 | `owl.png` | Mascot still: shown during the drop-in, and when Reduce Motion is on or the loop can't load | Owl from Figma, 697×724 | Must be the loop's first frame, at the same size and position, so the swap is invisible |
+| `home/owl-sleeping-loop.webp` | Home's sleeping owl (5s seamless loop) | Generated with Magnific (Seedance 2.5) from `home/owl-sleeping.png` on green, keyed with `scripts/make-owl-loop.mjs ... home` | Animated WebP with transparency, 328×214 (cropped to the owl), 24fps, 1.3 MB |
+| `home/owl-sleeping.png` | Home's sleeping owl, still: before the loop starts, with Reduce Motion, or if the loop can't load | Owl from Figma (without its bubble), 360×360 | Fills the 73×73pt frame; must be the loop's first frame |
+| `home/thought-bubble.png`, `home/thought-dot-large.png`, `home/thought-dot-small.png` | The owl's thought bubble with the lock, and its two dots | Cut from the Figma owl image | Positions are in `THOUGHT` in `GaugeMascot.tsx` |
 | `cloud-1.png` | Back cloud layer | From Figma, 2048×1138 | Shown at 889×494pt |
 | `cloud-2.png` | Front cloud layer | From Figma (same image) | Shown at 889×494pt |
 | `cloud-3.png` | Far, faint cloud layer (adds depth) | Same image | Shown at 600×333pt, 45% opacity |
@@ -241,9 +248,11 @@ The app needs iOS 16.4 or newer (Tailwind CSS v4 relies on it), which covers iPh
 
 ## Mascot animation
 
-The owl's loop is `src/assets/owl-loop.webp`, an animated WebP with transparency, shown by
+The paywall owl's loop is `src/assets/owl-loop.webp`, an animated WebP with transparency, shown by
 `components/OwlMascot.tsx`. During the drop-in the owl is the still `owl.png`; when it lands, the
-loop is swapped in over it, starting on the same first frame.
+loop is swapped in over it, starting on the same first frame. Home's sleeping owl works the same way:
+`home/owl-sleeping-loop.webp` over `home/owl-sleeping.png`, in `home/components/GaugeMascot.tsx`,
+once the screen has settled.
 
 It's deliberately an image, not a video. Every time a `<video>` starts or resumes in an iOS web
 view, the system media player takes over briefly and can freeze the whole page (about a second in
@@ -251,18 +260,22 @@ the Simulator, right in the middle of the intro). An animated image never involv
 
 To make a new loop:
 
-1. Put the still owl on a pure green (#00FF00) square, centred at about 60% of the width.
+1. Put the still owl on a pure green (#00FF00) square. Paywall: centred at about 60% of the width.
+   Home: the owl from `home/owl-sleeping.png` (without the bubble) at 2.4x, centred in a 1080px square.
 2. Generate a 5s silent 1:1 video with that image as both the start and end frame, a locked
    static camera, and a prompt that keeps the background flat green.
-3. Key it, crop it to the owl and encode it (needs ffmpeg: `brew install ffmpeg`):
+3. Key it, crop it to the owl and encode it (needs ffmpeg: `brew install ffmpeg`). The video's last
+   frame repeats its first, so the script leaves it out:
 
    ```bash
-   node scripts/make-owl-loop.mjs path/to/green-screen.mov src/assets/owl-loop.webp
+   node scripts/make-owl-loop.mjs path/to/green-screen.mov src/assets/owl-loop.webp                     # paywall
+   node scripts/make-owl-loop.mjs path/to/green-screen.mov src/assets/home/owl-sleeping-loop.webp home  # Home
    ```
 
-4. The script prints the loop's position (`top-…`, `left-…`, `size-…`). Copy those into the loop's
-   `<img>` in `components/OwlMascot.tsx`, so its first frame sits exactly over `owl.png`. (The
-   numbers assume the owl is framed as in step 1.)
+4. The script prints the loop's position (`top-…`, `left-…`, `w-…`, `h-…`). Copy those into the
+   loop's `<img>` in the component it names, so its first frame sits exactly over the still. (The
+   numbers assume the owl is framed as in step 1. `OwlMascot.tsx` currently uses one `size-…`, from
+   before the script cropped to rectangles.)
 
 ## Motion
 

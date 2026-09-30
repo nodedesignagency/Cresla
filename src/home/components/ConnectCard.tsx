@@ -9,14 +9,16 @@ interface ConnectCardProps {
   shimmer: boolean
   /** The report has just been connected: the gauge fills and the button stops responding. */
   filling: boolean
+  /** The sleeping owl breathes and its thought bubble floats (once the intro has settled). */
+  playing: boolean
 }
 
 /** First-time card: locked score gauge with the sleeping owl, and the Connect button. */
-export function ConnectCard({ onConnect, shimmer, filling }: ConnectCardProps) {
+export function ConnectCard({ onConnect, shimmer, filling, playing }: ConnectCardProps) {
   return (
     <div className="flex min-h-[256px] flex-col items-center justify-center gap-3 rounded-card bg-white p-4 shadow-card tiny:min-h-0 tiny:gap-2 tiny:p-3">
       <ScoreGauge shimmer={shimmer} filled={filling}>
-        <GaugeMascot className="absolute top-[36.06px] left-[50.68px]" />
+        <GaugeMascot playing={playing} className="absolute top-[36.06px] left-[50.68px]" />
       </ScoreGauge>
 
       <div className="flex w-full flex-col items-center gap-1 text-center">

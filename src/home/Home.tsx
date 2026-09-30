@@ -336,6 +336,7 @@ export function Home({
                     onConnect={onConnect}
                     shimmer={introSettled && !filling && !reduceMotion}
                     filling={filling}
+                    playing={introSettled}
                   />
                 </motion.div>
               </div>

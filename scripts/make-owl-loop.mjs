@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-// Turns a green-screen video into the mascot's transparent animated WebP, cropped to the owl.
+// Turns a green-screen video into a mascot's transparent animated WebP, cropped to the owl.
 //
-//   node scripts/make-owl-loop.mjs input.mov src/assets/owl-loop.webp [size=720]
+//   node scripts/make-owl-loop.mjs input.mov src/assets/owl-loop.webp                  paywall owl
+//   node scripts/make-owl-loop.mjs input.mov src/assets/home/owl-sleeping-loop.webp home   Home's sleeping owl
+//   (an optional last argument overrides the decode size, in pixels)
 //
 // Needs ffmpeg on your PATH (macOS: brew install ffmpeg), or set FFMPEG=/path/to/ffmpeg.
 //
@@ -10,26 +12,30 @@
 // pixel to drop the outermost ring where the generator blended the subject into the green.
 //
 // The video is read twice: once to find the box the owl stays inside across every frame, then
-// again to key and encode just that box. The script prints where to place it in OwlMascot.tsx.
+// again to key and encode just that box. The script prints where to place it in the component.
 import { spawn, spawnSync } from 'node:child_process'
 
-const [input, output, sizeArg = '720'] = process.argv.slice(2)
-if (!input || !output) {
-  console.error('Usage: node scripts/make-owl-loop.mjs input.mov output.webp [size=720]')
+// Where the whole square video frame sits in the component's box, so the loop's first frame lands
+// exactly on the still image. Each is only valid for the framing its start frame was made with.
+const PRESETS = {
+  // OwlMascot's 154×160pt box; owl centred at ~60% of the frame's width. Sizes scale with --owl.
+  paywall: { size: 720, framePt: 224.82, leftPt: -34.97, topPt: -33.71, file: 'paywall/components/OwlMascot.tsx', scale: '*var(--owl,1)' },
+  // GaugeMascot's 73×73pt box: the owl from owl-sleeping.png at 2.4x, centred in a 1080px frame.
+  home: { size: 480, framePt: 91.25, leftPt: -10.34, topPt: -1.39, file: 'home/components/GaugeMascot.tsx', scale: '' },
+}
+
+const [input, output, presetName = 'paywall', sizeArg] = process.argv.slice(2)
+const preset = PRESETS[presetName]
+if (!input || !output || !preset) {
+  console.error('Usage: node scripts/make-owl-loop.mjs input.mov output.webp [paywall|home] [size]')
   process.exit(1)
 }
 const FFMPEG = process.env.FFMPEG || 'ffmpeg'
-const SIZE = Number(sizeArg)
+const SIZE = Number(sizeArg ?? preset.size)
 const LO = 28 // green excess at or below this: fully opaque
 const HI = 150 // green excess at or above this: fully transparent
 const QUALITY = 80 // WebP quality; 80 is indistinguishable from the source at 2x zoom
 const PAD = 4 // transparent margin kept around the owl, in pixels
-
-// Where the whole SIZE×SIZE frame sits in OwlMascot's 154×160pt box, so its first frame lands
-// exactly on owl.png (owl centred at ~60% of the frame's width). Only valid for that framing.
-const FRAME_PT = 224.82
-const FRAME_LEFT_PT = -34.97
-const FRAME_TOP_PT = -33.71
 
 const probe = spawnSync(FFMPEG, ['-hide_banner', '-i', input], { encoding: 'utf8' })
 const fps = probe.stderr.match(/, ([\d.]+) fps/)?.[1]
@@ -152,12 +158,14 @@ function eachFrame(onFrame) {
   })
 }
 
-// Pass 1: the box the owl stays inside across the whole loop.
+// Pass 1: the box the owl stays inside across the whole loop, and how many frames there are.
 let x0 = SIZE,
   y0 = SIZE,
   x1 = -1,
-  y1 = -1
+  y1 = -1,
+  total = 0
 await eachFrame((rgba) => {
+  total++
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       if (!rgba[(y * SIZE + x) * 4 + 3]) continue
@@ -173,14 +181,19 @@ if (x1 < 0) {
   process.exit(1)
 }
 
-// A square with a small margin, an even number of pixels wide, kept inside the frame.
-let side = Math.max(x1 - x0, y1 - y0) + 1 + 2 * PAD
-side = Math.min(SIZE, side + (side % 2))
-const place = (lo, hi) => Math.min(SIZE - side, Math.max(0, Math.round((lo + hi + 1 - side) / 2)))
-const cropX = place(x0, x1)
-const cropY = place(y0, y1)
+// The box with a small margin, an even number of pixels each way, kept inside the frame.
+const span = (lo, hi) => {
+  const length = hi - lo + 1 + 2 * PAD
+  return Math.min(SIZE, length + (length % 2))
+}
+const width = span(x0, x1)
+const height = span(y0, y1)
+const place = (lo, hi, length) => Math.min(SIZE - length, Math.max(0, Math.round((lo + hi + 1 - length) / 2)))
+const cropX = place(x0, x1, width)
+const cropY = place(y0, y1, height)
 
-// Pass 2: key again and encode only that square.
+// Pass 2: key again and encode only that box. The video starts and ends on the same image, so
+// its last frame repeats the first; it's left out, and the loop wraps straight back to frame one.
 const encoder = spawn(FFMPEG, [
   '-v',
   'error',
@@ -190,7 +203,7 @@ const encoder = spawn(FFMPEG, [
   '-pix_fmt',
   'rgba',
   '-s',
-  `${side}x${side}`,
+  `${width}x${height}`,
   '-r',
   fps,
   '-i',
@@ -219,10 +232,11 @@ const encoded = new Promise((resolve, reject) =>
 
 let frames = 0
 await eachFrame((rgba) => {
-  const crop = Buffer.alloc(side * side * 4)
-  for (let y = 0; y < side; y++) {
+  if (frames === total - 1) return
+  const crop = Buffer.alloc(width * height * 4)
+  for (let y = 0; y < height; y++) {
     const from = ((cropY + y) * SIZE + cropX) * 4
-    rgba.copy(crop, y * side * 4, from, from + side * 4)
+    rgba.copy(crop, y * width * 4, from, from + width * 4)
   }
   frames++
   if (!encoder.stdin.write(crop)) return new Promise((resolve) => encoder.stdin.once('drain', resolve))
@@ -230,10 +244,10 @@ await eachFrame((rgba) => {
 encoder.stdin.end()
 await encoded
 
-const pt = FRAME_PT / SIZE
-const fmt = (v) => Number(v.toFixed(2))
-console.log(`✓ ${output}: ${frames} frames at ${side}×${side} (${fps} fps), cropped from ${SIZE}×${SIZE} at x=${cropX}, y=${cropY}`)
+const pt = preset.framePt / SIZE
+const css = (v) => (preset.scale ? `calc(${Number(v.toFixed(2))}px${preset.scale})` : `${Number(v.toFixed(2))}px`)
+console.log(`✓ ${output}: ${frames} frames at ${width}×${height} (${fps} fps), cropped from ${SIZE}×${SIZE} at x=${cropX}, y=${cropY}`)
 console.log(
-  `  OwlMascot.tsx: top-[calc(${fmt(FRAME_TOP_PT + cropY * pt)}px*var(--owl,1))] ` +
-    `left-[calc(${fmt(FRAME_LEFT_PT + cropX * pt)}px*var(--owl,1))] size-[calc(${fmt(side * pt)}px*var(--owl,1))]`,
+  `  ${preset.file}: top-[${css(preset.topPt + cropY * pt)}] left-[${css(preset.leftPt + cropX * pt)}] ` +
+    `w-[${css(width * pt)}] h-[${css(height * pt)}]`,
 )

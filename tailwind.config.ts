@@ -258,6 +258,8 @@ export default {
           '14%': { opacity: '0.55' },
           '34%, 100%': { opacity: '0' },
         },
+        // Home: the sleeping owl's thought bubble and its two dots bob gently, one after another.
+        'thought-float': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(-1.5px)' } },
         // Home gauge, on connect: each segment lights up with a small pop.
         'gauge-fill': {
           '0%': { opacity: '0', transform: 'scale(0.92)' },
@@ -290,6 +292,8 @@ export default {
         'ring-ripple': 'ring-ripple 3.3s linear infinite both',
         'gauge-shimmer': 'gauge-shimmer 3.6s ease-in-out infinite',
         'gauge-fill': 'gauge-fill 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        // Up and back down every 5s, the length of the owl's loop.
+        'thought-float': 'thought-float 2.5s ease-in-out infinite alternate both',
       },
     },
   },
