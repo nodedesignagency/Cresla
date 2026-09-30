@@ -78,7 +78,9 @@ relevant section rather than re-exploring.
 
 - Done: paywall (built from Figma, full motion, animated owl as an animated WebP, responsive,
   HD icons; the user confirmed it runs smoothly in the Simulator). Home screen: both states, all
-  interactions, app-launch logo intro, pulsing rings, returning body text. Demo connect flow.
+  interactions, app-launch logo intro, ripple pulse round the logo, returning body text, profile
+  picture instead of Sign In once connected, send arrow in the composer. Demo connect flow (the
+  Connect page shows the gauge 1.55x bigger, no card).
 - Waiting on the user:
   - Set the GitHub default branch to `main` (repo Settings → General → Default branch), then
     delete the old `claude/charming-hawking-ilb5hy` branch.
@@ -94,6 +96,12 @@ relevant section rather than re-exploring.
   callbacks only log to the console (`src/App.tsx`).
 
 ## Session log (newest first)
+
+- **4** (2026-09-30): user feedback. Logo rings: no static rings any more, a smooth ripple pulse
+  instead (also on the success badge; static rings only with Reduce Motion). Connect page: card
+  removed, gauge 1.55x via CSS zoom (owl image now 360px so it stays sharp). Sign In becomes the
+  profile picture (user's image) once connected. Composer: send arrow replaces the voice icon
+  while there's text.
 
 - **3** (2026-09-30): user feedback on Home. Logo now opens like an app (native launch screen with
   the logo at 2x, Home takes over and shrinks it into place; exact centring checked on iPhones

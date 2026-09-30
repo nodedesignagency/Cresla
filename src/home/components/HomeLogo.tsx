@@ -1,13 +1,17 @@
 import { Capacitor } from '@capacitor/core'
-import { motion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import logo from '../../assets/home/logo.png'
 import { delay } from '../../paywall/motion'
-import { glide, HOME_STORY, ringIn } from '../motion'
+import { glide, HOME_STORY } from '../motion'
 
-// Three faint rounded squares around the mark (Figma: 0.33pt brand-blue lines at 20% opacity).
-// Drawn as inset shadows: browsers round borders under 1px up to a whole point, shadows keep the hairline.
-const RINGS = ['size-[56.667px] rounded-[14.167px]', 'size-[63.333px] rounded-[15.833px]', 'size-[70px] rounded-[17.5px]']
+// The pulse: rings the size of the design's innermost ring leave the logo's edge, grow and fade
+// out, a third of a cycle apart, so the ripple is continuous (`ring-ripple` in tailwind.config.ts).
+const RIPPLES = 3
+const RIPPLE_CYCLE = 3.6
+
+// With Reduce Motion there's no pulse; the design's three faint static rings show instead (0.33pt
+// brand-blue lines at 20%, drawn as inset shadows because browsers round thinner borders up to 1pt).
+const STATIC_RINGS = ['size-[56.667px] rounded-[14.167px]', 'size-[63.333px] rounded-[15.833px]', 'size-[70px] rounded-[17.5px]']
 
 const LONG_PRESS_MS = 600
 
@@ -19,15 +23,15 @@ interface HomeLogoProps {
    * its size, exactly where the native launch screen showed it. Off with Reduce Motion.
    */
   splash: boolean
-  /** The rings pulse (after the intro, while this screen is showing). */
-  pulse: boolean
+  /** pulse: rings ripple out from the logo once it has landed. static: the design's still rings. */
+  rings: 'pulse' | 'static'
   /** Fires when the mark has loaded (or failed), so the intro never starts on a blank logo. */
   onReady?: () => void
   /** Fires after a 0.6s press on the logo (a testing shortcut, see Home). */
   onLongPress?: () => void
 }
 
-export function HomeLogo({ playing, splash, pulse, onReady, onLongPress }: HomeLogoProps) {
+export function HomeLogo({ playing, splash, rings, onReady, onLongPress }: HomeLogoProps) {
   const markRef = useRef<HTMLImageElement>(null)
   const pressTimer = useRef<number | undefined>(undefined)
   const cancelPress = () => window.clearTimeout(pressTimer.current)
@@ -92,21 +96,24 @@ export function HomeLogo({ playing, splash, pulse, onReady, onLongPress }: HomeL
         className={`pointer-events-none absolute top-1/2 left-1/2 -mt-[70px] -ml-[70px] size-[140px] rounded-full bg-logo-glow opacity-0 ${playing ? 'animate-logo-glow' : ''}`}
         style={delay(splash ? HOME_STORY.glow : 0)}
       />
-      {RINGS.map((ring, index) => (
-        // Entrance on the outer element, the pulse on the ring itself.
-        <motion.span
-          key={ring}
-          aria-hidden
-          variants={ringIn}
-          custom={HOME_STORY.rings + index * HOME_STORY.step}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <span
-            className={`shrink-0 text-brand-ring opacity-20 shadow-[inset_0_0_0_0.333px_currentColor] ${ring} ${pulse ? 'animate-ring-pulse' : ''}`}
-            style={delay(index * 0.18)}
-          />
-        </motion.span>
-      ))}
+      <span aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        {rings === 'pulse'
+          ? playing &&
+            Array.from({ length: RIPPLES }, (_, index) => (
+              <span
+                key={index}
+                className="absolute size-[56.667px] animate-ring-ripple rounded-[14.167px] bg-brand-ring/4 text-brand-ring shadow-[inset_0_0_0_0.75px_currentColor]"
+                // They start as the logo lands, then keep a third of a cycle apart.
+                style={delay(HOME_STORY.glow + (index * RIPPLE_CYCLE) / RIPPLES)}
+              />
+            ))
+          : STATIC_RINGS.map((ring) => (
+              <span
+                key={ring}
+                className={`absolute text-brand-ring opacity-20 shadow-[inset_0_0_0_0.333px_currentColor] ${ring}`}
+              />
+            ))}
+      </span>
       <img
         ref={markRef}
         src={logo}

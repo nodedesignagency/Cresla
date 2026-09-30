@@ -158,7 +158,9 @@ import { Home } from './home'
   onSignIn={openSignIn}
   onMenu={openMenu}
   onModeChange={(mode) => {}}     // 'chat' | 'support'
+  onProfile={openProfile}         // the profile picture that replaces Sign In once connected
   onAttach={...} onDictate={...} onVoice={...} // composer's + / mic / voice buttons
+  onSend={(text) => {}}           // the send arrow, shown instead of voice while there's text
 />
 ```
 
@@ -175,7 +177,13 @@ import { Home } from './home'
   the launch screen (`@capacitor/splash-screen`, see `src/launch.ts`), then shrinks the logo into
   place while the rest rises in. iOS caches launch screens: if the Simulator still shows the old
   plain one, delete the app from the Simulator (hold its icon → Remove App) and run again.
-- **Logo rings** pulse softly from the inner ring out, once the intro has settled.
+- **Pulse around the logo:** rings leave the logo's edge, grow and fade, three a third of a cycle
+  apart (`ring-ripple` in `tailwind.config.ts`); the success badge uses the same pulse. With Reduce
+  Motion the design's three still rings show instead.
+- **Top right:** Sign In before the report is connected; after, the profile picture
+  (`assets/home/avatar.png`, 41pt, calls `onProfile`).
+- **Composer:** while there's text, the blue voice button shows a send arrow instead (`onSend`,
+  then the field clears).
 - **Suggestion chips** fill the composer with their text and focus it. They're listed in
   `SUGGESTIONS` in `Home.tsx`. The row scrolls sideways under a soft fade when it doesn't fit.
 - **Mascot:** `components/GaugeMascot.tsx` is the only place that knows about the owl image. To

@@ -46,15 +46,18 @@ export function ConnectReport({ onBack, onConnected }: ConnectReportProps) {
         </>
       }
     >
-      <div className="flex w-full flex-col items-center gap-3 rounded-card bg-white px-4 pt-6 pb-4 shadow-card">
-        <ScoreGauge shimmer={!connecting} filled={connecting}>
-          <GaugeMascot className="absolute top-[36.06px] left-[50.68px]" />
-        </ScoreGauge>
-        <p className="text-caption text-muted" aria-live="polite">
+      {/* The gauge, bigger than on Home: zoom re-renders it at the larger size, so it stays sharp */}
+      <div className="flex flex-col items-center gap-4">
+        <div className="[zoom:1.55] tiny:[zoom:1.3]">
+          <ScoreGauge shimmer={!connecting} filled={connecting}>
+            <GaugeMascot className="absolute top-[36.06px] left-[50.68px]" />
+          </ScoreGauge>
+        </div>
+        <p className="text-label font-normal text-muted" aria-live="polite">
           {connecting ? 'Checking all 3 bureaus…' : 'Your reports are locked'}
         </p>
       </div>
-      <h1 className="mt-8 text-display font-medium text-ink">Connect your credit report</h1>
+      <h1 className="mt-10 text-display font-medium text-ink tiny:mt-6">Connect your credit report</h1>
       <p className="mt-3 max-w-[300px] text-label font-normal text-muted">
         We’ll securely pull your reports from all 3 bureaus and check every line for errors.
       </p>

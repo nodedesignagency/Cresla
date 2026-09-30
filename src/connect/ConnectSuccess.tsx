@@ -7,9 +7,11 @@ import { DemoNote, FlowScreen } from './FlowScreen'
 // Begins as the screen finishes sliding in.
 const AT = 0.3
 
-const RINGS = ['size-[112px]', 'size-[128px]', 'size-[144px]']
+// The same pulse as around the Home logo: rings leave the badge's edge, grow and fade out.
+const RIPPLES = 3
+const RIPPLE_CYCLE = 3.6
 
-/** Stand-in success screen after connecting: a check badge with pulsing rings, then Continue. */
+/** Stand-in success screen after connecting: a check badge with a pulse around it, then Continue. */
 export function ConnectSuccess({ onContinue }: { onContinue: () => void }) {
   return (
     <FlowScreen
@@ -21,21 +23,15 @@ export function ConnectSuccess({ onContinue }: { onContinue: () => void }) {
       }
     >
       <div className="relative flex size-[144px] items-center justify-center">
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: easeOut, delay: AT + 0.2 }}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          {RINGS.map((ring, index) => (
+        <span aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          {Array.from({ length: RIPPLES }, (_, index) => (
             <span
-              key={ring}
-              className={`absolute rounded-full text-brand-ring opacity-20 shadow-[inset_0_0_0_0.5px_currentColor] animate-ring-pulse ${ring}`}
-              style={delay(AT + 0.6 + index * 0.18)}
+              key={index}
+              className="absolute size-24 animate-ring-ripple rounded-full bg-brand-ring/4 text-brand-ring shadow-[inset_0_0_0_0.75px_currentColor] motion-reduce:hidden"
+              style={delay(AT + 0.4 + (index * RIPPLE_CYCLE) / RIPPLES)}
             />
           ))}
-        </motion.div>
+        </span>
         <motion.div
           initial={{ opacity: 0, transform: 'scale(0.5)' }}
           animate={{ opacity: 1, transform: 'scale(1)' }}

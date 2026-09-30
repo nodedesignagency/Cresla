@@ -1,6 +1,7 @@
 import { useLayoutEffect, type RefObject } from 'react'
 import micIcon from '../../assets/home/icon-mic.svg'
 import plusIcon from '../../assets/home/icon-plus.svg'
+import sendIcon from '../../assets/home/icon-send.svg'
 import voiceIcon from '../../assets/home/icon-voice.svg'
 import { focusRing, hitArea } from '../../paywall/ui'
 
@@ -14,11 +15,18 @@ interface ComposerProps {
   onAttach?: () => void
   onDictate?: () => void
   onVoice?: () => void
+  /** Tapped the send arrow, which replaces voice mode while there's text. */
+  onSend?: () => void
 }
 
 const press = 'transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.9]'
 
-export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoice }: ComposerProps) {
+// The blue button's two icons swap with a quick turn and scale.
+const swap = 'absolute transition-[opacity,scale,rotate] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]'
+
+export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoice, onSend }: ComposerProps) {
+  const canSend = value.trim().length > 0
+
   useLayoutEffect(() => {
     const field = fieldRef.current
     if (!field) return
@@ -62,13 +70,23 @@ export function Composer({ value, onChange, fieldRef, onAttach, onDictate, onVoi
             >
               <img src={micIcon} alt="" className="size-[15.864px] max-w-none" />
             </button>
+            {/* Voice mode while the field is empty; the send arrow once there's something to send */}
             <button
               type="button"
-              aria-label="Voice mode"
-              onClick={onVoice}
+              aria-label={canSend ? 'Send' : 'Voice mode'}
+              onClick={canSend ? onSend : onVoice}
               className={`${hitArea} ${focusRing} ${press} flex size-7 cursor-pointer items-center justify-center rounded-full bg-brand shadow-voice`}
             >
-              <img src={voiceIcon} alt="" className="size-[15.864px] max-w-none" />
+              <img
+                src={voiceIcon}
+                alt=""
+                className={`${swap} size-[15.864px] max-w-none ${canSend ? 'scale-50 -rotate-45 opacity-0' : ''}`}
+              />
+              <img
+                src={sendIcon}
+                alt=""
+                className={`${swap} size-[15.864px] max-w-none ${canSend ? '' : 'scale-50 rotate-45 opacity-0'}`}
+              />
             </button>
           </div>
         </div>

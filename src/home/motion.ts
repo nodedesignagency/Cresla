@@ -1,7 +1,5 @@
 // Home motion. The entrance reuses the paywall's variants (src/paywall/motion.ts), so both screens
 // share one feel; like there, only whole `transform` / `opacity` / `filter` values are animated.
-import type { Variants } from 'framer-motion'
-import { easeOut, easeOutExpo } from '../paywall/motion'
 
 /**
  * Load-in storyboard, in seconds from the moment the logo image is ready. It opens like an app
@@ -15,9 +13,8 @@ export const HOME_STORY = {
   splashShrink: 0.85,
   /** The soft background glows fade in. */
   backdrop: 0.2,
-  /** As the logo lands: its glow blooms, and the rings spread out `step` apart. */
+  /** As the logo lands: its glow blooms and the ring pulse begins. */
   glow: 0.85,
-  rings: 0.95,
   topBar: 1.0,
   headline: 1.0,
   subtitle: 1.08,
@@ -25,7 +22,7 @@ export const HOME_STORY = {
   /** First suggestion chip; the rest follow `step` apart. */
   chips: 1.28,
   composer: 1.38,
-  /** Everything has landed; the gauge shimmer and the ring pulse start. */
+  /** Everything has landed; the gauge shimmer starts. */
   settled: 2.2,
   step: 0.06,
 } as const
@@ -44,16 +41,3 @@ export const CONNECT = {
 
 /** iOS-style ease for layout moves: fast start, long soft landing. */
 export const glide = 'cubic-bezier(0.22, 1, 0.36, 1)'
-
-/** The faint rings around the logo spread out to their places. Pass the delay with `custom`. */
-export const ringIn: Variants = {
-  hidden: { opacity: 0, transform: 'scale(0.82)' },
-  show: (delay: number) => ({
-    opacity: 1,
-    transform: 'scale(1)',
-    transition: {
-      opacity: { duration: 0.6, ease: easeOut, delay },
-      transform: { duration: 0.9, ease: easeOutExpo, delay },
-    },
-  }),
-}

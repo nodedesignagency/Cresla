@@ -67,6 +67,8 @@ function HomeFlow() {
           push('connect')
         }}
         onSignIn={() => console.log('[Home] onSignIn')}
+        onProfile={() => console.log('[Home] onProfile')}
+        onSend={(text) => console.log('[Home] onSend', text)}
         onMenu={() => console.log('[Home] onMenu')}
         onModeChange={(mode) => console.log('[Home] onModeChange', mode)}
         onAttach={() => console.log('[Home] onAttach')}

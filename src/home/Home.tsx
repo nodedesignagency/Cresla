@@ -1,5 +1,6 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import avatar from '../assets/home/avatar.png'
 import helpIcon from '../assets/home/icon-help.svg'
 import menuIcon from '../assets/home/icon-menu.svg'
 import sparkleIcon from '../assets/home/icon-sparkle.svg'
@@ -43,13 +44,17 @@ export interface HomeProps {
   active?: boolean
   /** Connect credit report was tapped. */
   onConnect: () => void
+  /** Top right: Sign In before the report is connected, the profile picture after. */
   onSignIn?: () => void
+  onProfile?: () => void
   onMenu?: () => void
   onModeChange?: (mode: HomeMode) => void
   /** Composer buttons: + , microphone, voice mode. */
   onAttach?: () => void
   onDictate?: () => void
   onVoice?: () => void
+  /** The send arrow (shown in place of voice mode while there's text) was tapped. */
+  onSend?: (text: string) => void
   /** Testing shortcut: fires when the logo is held for 0.6s. */
   onLogoLongPress?: () => void
 }
@@ -59,11 +64,13 @@ export function Home({
   active = true,
   onConnect,
   onSignIn,
+  onProfile,
   onMenu,
   onModeChange,
   onAttach,
   onDictate,
   onVoice,
+  onSend,
   onLogoLongPress,
 }: HomeProps) {
   const reduceMotion = useReducedMotion()
@@ -249,13 +256,40 @@ export function Home({
               }}
             />
           </div>
-          <button
-            type="button"
-            onClick={onSignIn}
-            className={`${hitArea} ${focusRing} flex h-[41px] cursor-pointer items-center rounded-[41px] bg-white/70 px-3 text-button font-medium text-black transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.95]`}
-          >
-            Sign In
-          </button>
+          {/* Sign In turns into the profile picture once the report is connected (same 41pt height) */}
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.div
+              key={hasConnectedReport ? 'profile' : 'sign-in'}
+              initial={{ opacity: 0, transform: 'scale(0.6)' }}
+              animate={{ opacity: 1, transform: 'scale(1)' }}
+              exit={{ opacity: 0, transform: 'scale(0.6)' }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { opacity: { duration: 0.2 }, transform: { type: 'spring', duration: 0.45, bounce: 0.3 } }
+              }
+              className="origin-right"
+            >
+              {hasConnectedReport ? (
+                <button
+                  type="button"
+                  aria-label="Profile"
+                  onClick={onProfile}
+                  className={`${hitArea} ${focusRing} flex size-[41px] cursor-pointer rounded-full transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.92]`}
+                >
+                  <img src={avatar} alt="" draggable={false} className="size-full max-w-none rounded-full" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSignIn}
+                  className={`${hitArea} ${focusRing} flex h-[41px] cursor-pointer items-center rounded-[41px] bg-white/70 px-3 text-button font-medium text-black transition-[scale] duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-[0.95]`}
+                >
+                  Sign In
+                </button>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </motion.header>
 
         {/* Logo, headline and (first time) the card, centred between the top bar and the chips.
@@ -272,7 +306,7 @@ export function Home({
               <HomeLogo
                 playing={introStarted && !reduceMotion}
                 splash={!reduceMotion}
-                pulse={introSettled && active && !reduceMotion}
+                rings={reduceMotion ? 'static' : 'pulse'}
                 onReady={() => setLogoReady(true)}
                 onLongPress={onLogoLongPress}
               />
@@ -324,6 +358,10 @@ export function Home({
               onAttach={onAttach}
               onDictate={onDictate}
               onVoice={onVoice}
+              onSend={() => {
+                onSend?.(draft.trim())
+                setDraft('')
+              }}
             />
           </motion.div>
         </div>
