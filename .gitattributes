@@ -1,0 +1,3 @@
+# Left out of downloads (git archive, GitHub's "Download ZIP"): internal working notes.
+CLAUDE.md export-ignore
+.gitattributes export-ignore

@@ -106,10 +106,14 @@ relevant section rather than re-exploring.
   - Approve the placeholder copy: returning body text "Ask about your report, disputes or next
     steps.", and the demo Connect / Success page texts.
   - Check the sleeping owl on the Simulator and the iPhone.
-- Delivery (client approved, session 6): the GitHub repo is PUBLIC and its default branch is still
-  the old `claude/charming-hawking-ilb5hy`, so "Download ZIP" from the repo page gives the old
-  paywall-only code. The app icon is still Capacitor's placeholder (blue X). CLAUDE.md is internal.
-  A fresh clone of `main` installs, builds and `cap copy`s cleanly.
+- Delivered (client approved, session 6). README is now written for the client (what's included,
+  a table of what their developer must still connect and where, run steps). App icon made from
+  `home/logo.png` (mark traced with potrace from a 4x Lanczos matte, slight blur, on the brand
+  gradient; 1024 RGB). Capacitor's unused default Splash.imageset removed. `.gitattributes`
+  export-ignores CLAUDE.md, so `git archive` and GitHub's Download ZIP leave it out; the user got
+  a ZIP made with `git archive --prefix=Cresla/ HEAD`, verified by a clean install + build.
+- Waiting on the user for delivery: make the GitHub repo private, set the default branch to `main`
+  (Download ZIP otherwise gives the old paywall-only branch).
 - Idea offered to the user, not built: the lock in the bubble could pop open when the report connects.
 - Open question: Home's third Figma chip ("How Can Cresla Help", no "?", Geist font, document
   icon) looked like a leftover duplicate and was left out.
@@ -135,6 +139,7 @@ relevant section rather than re-exploring.
   `--home-safe-top`/`--home-safe-bottom` set to the device's real insets). Then +12pt taller
   (120pt; 22px top padding and gap; SE +8, 7pt spare). Chips' shadow was cut (scrolling row clips,
   composer 10pt below covers it): chips now use `shadow-chip`, the card shadow's two closest layers.
+  Client approved; prepared the delivery (icon, client README, clean ZIP; see Current state).
 
 - **5** (2026-09-30): the pulse was too harsh; matched the user's reference video (measured it:
   thin faint rings drifting out at ~constant speed, one per ~1s, fading). Now `ring-ripple` is
